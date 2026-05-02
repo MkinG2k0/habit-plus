@@ -56,6 +56,8 @@ function DrawerContent({
         data-slot="drawer-content"
         className={cn(
           "group/drawer-content bg-background fixed z-50 flex h-auto flex-col",
+          "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-bottom-4 data-[state=open]:duration-300",
+          "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-bottom-4 data-[state=closed]:duration-300",
           `pt-[max(0.75rem,env(safe-area-inset-top,0px))]
            pr-[max(0.5rem,env(safe-area-inset-right,0px))]
            pb-[max(1rem,env(safe-area-inset-bottom,0px))]

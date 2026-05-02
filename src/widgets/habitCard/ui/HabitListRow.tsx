@@ -7,14 +7,14 @@ import { cn } from "@/shared/ui/lib/utils";
 interface HabitListRowProps {
   habit: Habit;
   days: DayInfo[];
-  onToggle: () => void;
+  onToggleDay: (dateKey: string) => void;
   onOpen: () => void;
 }
 
 export const HabitListRow = ({
   habit,
   days,
-  onToggle,
+  onToggleDay,
   onOpen,
 }: HabitListRowProps) => {
   return (
@@ -29,7 +29,7 @@ export const HabitListRow = ({
         }
       }}
       className={cn(
-        "flex h-14 cursor-pointer items-center gap-2.5 border py-0 pl-3 pr-3 shadow-sm",
+        "flex h-14 cursor-pointer flex-row items-center gap-2.5 border py-0 pl-3 pr-3 shadow-sm",
       )}
     >
       <div
@@ -41,31 +41,26 @@ export const HabitListRow = ({
       <div className="min-w-0 flex-1 truncate text-[15px] font-medium text-foreground">
         {habit.name}
       </div>
-      <div className="flex gap-1.5">
+      <div
+        className="flex gap-1.5"
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
+      >
         {days.map((day) => {
           const filled = habit.completions[day.key] ?? false;
           return (
             <button
               key={day.key}
               type="button"
-              className={cn(
-                "size-7 shrink-0 rounded-md transition-colors",
-                day.isToday ? "cursor-pointer" : "cursor-default",
-              )}
+              className="size-7 shrink-0 cursor-pointer rounded-md transition-colors"
               style={{
-                backgroundColor: filled
-                  ? habit.color
-                  : `${habit.color}25`,
+                backgroundColor: filled ? habit.color : `${habit.color}25`,
               }}
-              onClick={
-                day.isToday
-                  ? (e) => {
-                      e.stopPropagation();
-                      onToggle();
-                    }
-                  : undefined
-              }
-              aria-label={day.isToday ? "Переключить сегодня" : undefined}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleDay(day.key);
+              }}
+              aria-label={`Переключить ${day.label} ${day.date}`}
             />
           );
         })}

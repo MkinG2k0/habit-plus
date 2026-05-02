@@ -1,28 +1,21 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   DEFAULT_HABIT_COLOR,
   HABIT_COLOR_OPTIONS,
   useHabitStore,
   type HabitCategoryTag,
-  type HabitIconName,
+  type HabitIconId,
 } from "@/entities/habit";
 import { HabitCategoriesField } from "@/features/habitCategories";
+import { HabitIconPickerDrawer } from "@/features/habitIconPicker";
 import { Button } from "@/shared/ui/shadCNComponents/ui/button";
 import { Card, CardContent } from "@/shared/ui/shadCNComponents/ui/card";
 import { Input } from "@/shared/ui/shadCNComponents/ui/input";
 import { Label } from "@/shared/ui/shadCNComponents/ui/label";
+import { CATEGORY_PICKER_ICONS } from "@/shared/lib/lucidePickerIcons";
 import { HabitIcon } from "@/shared/ui/habitIcon/HabitIcon";
 import { cn } from "@/shared/ui/lib/utils";
-
-const ICON_OPTIONS: HabitIconName[] = [
-  "health",
-  "brain",
-  "book",
-  "sport",
-  "water",
-  "meditation",
-];
 
 export const EditHabitPage = () => {
   const navigate = useNavigate();
@@ -35,11 +28,21 @@ export const EditHabitPage = () => {
   const [name, setName] = useState(existing?.name ?? "");
   const [desc, setDesc] = useState(existing?.desc ?? "");
   const [color, setColor] = useState(existing?.color ?? DEFAULT_HABIT_COLOR);
-  const [icon, setIcon] = useState<HabitIconName>(existing?.icon ?? "health");
+  const [icon, setIcon] = useState<HabitIconId>(existing?.icon ?? "health");
+  const [iconPickerOpen, setIconPickerOpen] = useState(false);
   const [categoryTags, setCategoryTags] = useState<HabitCategoryTag[]>(
     existing?.categoryTags ?? [],
   );
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  const bgIconPattern = useMemo(
+    () =>
+      Array.from({ length: 84 }, (_, i) => {
+        const entry = CATEGORY_PICKER_ICONS[i % CATEGORY_PICKER_ICONS.length]!;
+        return { Icon: entry.Icon, key: `${String(i)}-${entry.name}` };
+      }),
+    [],
+  );
 
   const canSave = name.trim().length > 0;
 
@@ -85,55 +88,43 @@ export const EditHabitPage = () => {
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
-        <div className="relative mb-5 flex h-[120px] items-center justify-center">
+        <div className="relative mb-5 flex min-h-[136px] h-[136px] items-center justify-center sm:h-[144px]">
           <div
-            className="pointer-events-none absolute inset-0 flex flex-wrap items-center justify-center gap-3 overflow-hidden opacity-15"
+            className="pointer-events-none absolute inset-0 grid h-full w-full grid-cols-12 grid-rows-[repeat(7,minmax(0,1fr))] gap-0.5 overflow-hidden opacity-[0.14]"
             aria-hidden
           >
-            {Array.from({ length: 24 }, (_, i) => {
-              const k = ICON_OPTIONS[i % ICON_OPTIONS.length]!;
-              return (
-                <HabitIcon
-                  key={`${k}-bg-${String(i)}`}
-                  name={k}
-                  color="#fff"
-                  size={18}
+            {bgIconPattern.map(({ Icon, key }) => (
+              <div
+                key={key}
+                className="flex min-h-0 min-w-0 items-center justify-center"
+              >
+                <Icon
+                  size={14}
+                  strokeWidth={2}
+                  fill="none"
+                  stroke="currentColor"
+                  className="max-h-[90%] max-w-[90%] shrink-0 text-foreground"
                 />
-              );
-            })}
+              </div>
+            ))}
           </div>
-          <div className="relative z-[1] flex size-[72px] items-center justify-center rounded-full border-2 border-border bg-card">
+          <button
+            type="button"
+            onClick={() => setIconPickerOpen(true)}
+            className="relative z-1 flex size-[72px] cursor-pointer items-center justify-center rounded-full border-2 border-border bg-card transition-colors hover:bg-muted/40 active:bg-muted/60"
+            aria-label="Выбрать значок или эмодзи"
+          >
             <HabitIcon name={icon} color="#fff" size={28} />
-          </div>
+          </button>
         </div>
 
-        <div className="mb-5 flex justify-center gap-2.5">
-          {ICON_OPTIONS.map((k) => (
-            <button
-              key={k}
-              type="button"
-              onClick={() => setIcon(k)}
-              className={cn(
-                "flex size-11 items-center justify-center rounded-2xl border transition-colors",
-                icon === k
-                  ? "border-transparent"
-                  : "border-border bg-card",
-              )}
-              style={
-                icon === k
-                  ? { backgroundColor: `${color}33`, borderColor: color }
-                  : undefined
-              }
-              aria-label={k}
-            >
-              <HabitIcon
-                name={k}
-                color={icon === k ? color : "var(--muted-foreground)"}
-                size={20}
-              />
-            </button>
-          ))}
-        </div>
+        <HabitIconPickerDrawer
+          open={iconPickerOpen}
+          onOpenChange={setIconPickerOpen}
+          value={icon}
+          onChange={setIcon}
+          accentColor={color}
+        />
 
         <div className="space-y-3.5">
           <div>

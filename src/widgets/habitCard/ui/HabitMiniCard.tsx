@@ -24,11 +24,9 @@ export const HabitMiniCard = ({ habit, onOpen }: HabitMiniCardProps) => {
           onOpen();
         }
       }}
-      className={cn(
-        "min-w-0 flex-1 cursor-pointer gap-0 border py-3 shadow-sm",
-      )}
+      className={cn("min-w-0 flex-1 cursor-pointer gap-0 border p-0 shadow-sm")}
     >
-      <CardContent className="flex flex-col gap-2 px-3 pb-3 pt-0">
+      <CardContent className="flex flex-col gap-2 p-2 pb-1">
         <div className="flex items-center gap-2">
           <div
             className="flex size-8 shrink-0 items-center justify-center rounded-lg"
@@ -40,7 +38,9 @@ export const HabitMiniCard = ({ habit, onOpen }: HabitMiniCardProps) => {
             <div className="truncate text-[13px] font-semibold leading-[18px] text-foreground">
               {habit.name}
             </div>
-            <div className="text-[11px] text-muted-foreground">{monthLabel}</div>
+            <div className="text-[11px] text-muted-foreground">
+              {monthLabel}
+            </div>
           </div>
         </div>
         <DotGrid

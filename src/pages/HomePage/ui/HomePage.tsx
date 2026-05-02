@@ -22,7 +22,8 @@ import {
 
 export const HomePage = () => {
   const navigate = useNavigate();
-  const { habits, viewMode, setViewMode, toggleToday } = useHabitStore();
+  const { habits, viewMode, setViewMode, toggleToday, toggleDateCompletion } =
+    useHabitStore();
   const today = useTodayKey();
   const last5 = useLastNDays(5);
   const [categoryFilter, setCategoryFilter] = useState<HabitCategoryFilter>(null);
@@ -156,7 +157,7 @@ export const HomePage = () => {
                   key={h.id}
                   habit={h}
                   days={last5}
-                  onToggle={() => toggleToday(h.id)}
+                  onToggleDay={(dateKey) => toggleDateCompletion(h.id, dateKey)}
                   onOpen={() => openDetail(h.id)}
                 />
               ))}

@@ -19,7 +19,7 @@ import {
   CATEGORY_PICKER_ICONS,
   DEFAULT_CUSTOM_ICON_NAME,
   type CategoryPickerIconName,
-} from "../lib/categoryPickerIcons";
+} from "@/shared/lib/lucidePickerIcons";
 import {
   formatCategoryTagsSummary,
   isPresetSelected,
@@ -279,6 +279,8 @@ export const HabitCategoriesField = ({
                         <Icon
                           size={20}
                           strokeWidth={2}
+                          fill="none"
+                          stroke="currentColor"
                           className="text-foreground"
                         />
                       </button>

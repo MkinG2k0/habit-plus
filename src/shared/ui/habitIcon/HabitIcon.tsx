@@ -1,16 +1,53 @@
-import type { HabitIconName } from "@/entities/habit";
+import type { HabitIconId, HabitIconName } from "@/entities/habit";
+import { getCategoryPickerIconEntry } from "@/shared/lib/lucidePickerIcons";
+import { Sparkles } from "lucide-react";
 
 interface HabitIconProps {
-  name: HabitIconName | string;
+  name: HabitIconId;
   color?: string;
   size?: number;
 }
+
+const EMOJI_PREFIX = "emoji:";
 
 export const HabitIcon = ({
   name,
   color = "#fff",
   size = 20,
 }: HabitIconProps) => {
+  if (name.startsWith(EMOJI_PREFIX)) {
+    const glyph = name.slice(EMOJI_PREFIX.length);
+    return (
+      <span
+        className="inline-flex shrink-0 items-center justify-center leading-none"
+        style={{
+          fontSize: Math.round(size * 0.9),
+          width: size,
+          height: size,
+        }}
+        role="img"
+        aria-hidden
+      >
+        {glyph}
+      </span>
+    );
+  }
+
+  const lucide = getCategoryPickerIconEntry(name);
+  if (lucide) {
+    const Icon = lucide.Icon;
+    return (
+      <Icon
+        width={size}
+        height={size}
+        strokeWidth={2}
+        fill="none"
+        stroke={color}
+        className="shrink-0"
+      />
+    );
+  }
+
   const props = {
     width: size,
     height: size,
@@ -22,7 +59,7 @@ export const HabitIcon = ({
     strokeLinejoin: "round" as const,
   };
 
-  switch (name) {
+  switch (name as HabitIconName) {
     case "health":
       return (
         <svg {...props}>
@@ -78,11 +115,18 @@ export const HabitIcon = ({
           <polyline points="8 6 2 12 8 18" />
         </svg>
       );
-    default:
+    default: {
+      const Fallback = Sparkles;
       return (
-        <svg {...props}>
-          <circle cx="12" cy="12" r="8" />
-        </svg>
+        <Fallback
+          width={size}
+          height={size}
+          strokeWidth={2}
+          fill="none"
+          stroke={color}
+          className="shrink-0"
+        />
       );
+    }
   }
 };

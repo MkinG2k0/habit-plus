@@ -1,5 +1,5 @@
 import { Sparkles } from "lucide-react";
-import { getCategoryPickerIconEntry } from "../lib/categoryPickerIcons";
+import { getCategoryPickerIconEntry } from "@/shared/lib/lucidePickerIcons";
 
 export const CustomCategoryLucideIcon = ({
   name,
@@ -12,5 +12,13 @@ export const CustomCategoryLucideIcon = ({
 }) => {
   const entry = getCategoryPickerIconEntry(name);
   const Icon = entry?.Icon ?? Sparkles;
-  return <Icon className={className} size={size} strokeWidth={2} />;
+  return (
+    <Icon
+      className={className}
+      size={size}
+      strokeWidth={2}
+      fill="none"
+      stroke="currentColor"
+    />
+  );
 };

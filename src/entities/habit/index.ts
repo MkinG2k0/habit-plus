@@ -1,6 +1,7 @@
 export type {
   Habit,
   HabitCategoryTag,
+  HabitIconId,
   HabitIconName,
   Reminder,
   ViewMode,

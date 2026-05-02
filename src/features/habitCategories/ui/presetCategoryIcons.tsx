@@ -40,5 +40,13 @@ export const PresetCategoryIcon = ({
   size?: number;
 }) => {
   const Icon = PRESET_ICONS[id];
-  return <Icon className={className} size={size} strokeWidth={2} />;
+  return (
+    <Icon
+      className={className}
+      size={size}
+      strokeWidth={2}
+      fill="none"
+      stroke="currentColor"
+    />
+  );
 };

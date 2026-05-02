@@ -1,5 +1,6 @@
 import type { HabitPresetCategoryId } from "./habitPresetCategories";
 
+/** Встроенные SVG-значки (до Lucide); сохраняются в данных как строка. */
 export type HabitIconName =
   | "health"
   | "brain"
@@ -9,6 +10,12 @@ export type HabitIconName =
   | "meditation"
   | "music"
   | "code";
+
+/**
+ * Значок привычки: legacy-ключ (`HabitIconName`), имя иконки Lucide из
+ * `CATEGORY_PICKER_ICONS`, или `emoji:` + символ(ы).
+ */
+export type HabitIconId = string;
 
 /** Готовая категория или пользовательская (название + значок из набора). */
 export type HabitCategoryTag =
@@ -25,7 +32,7 @@ export interface Habit {
   id: number;
   name: string;
   desc: string;
-  icon: HabitIconName;
+  icon: HabitIconId;
   color: string;
   completions: Record<string, boolean>;
   streakGoal?: number;

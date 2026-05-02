@@ -1,6 +1,12 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useHabitStore } from "@/entities/habit";
+import {
+  buildHomeCategoryFilterChips,
+  categoryFiltersEqual,
+  habitMatchesCategoryFilter,
+  type HabitCategoryFilter,
+} from "@/features/habitCategories";
 import { HabitDetailDrawer } from "@/features/habitDetail";
 import { useLastNDays, useTodayKey } from "@/shared/lib/habitDates";
 import { Badge } from "@/shared/ui/shadCNComponents/ui/badge";
@@ -8,6 +14,7 @@ import { Button } from "@/shared/ui/shadCNComponents/ui/button";
 import {
   HabitBottomNav,
   HabitCard,
+  HabitCategoryFilterBar,
   HabitListRow,
   HabitMiniCard,
   HabitTopBar,
@@ -18,11 +25,30 @@ export const HomePage = () => {
   const { habits, viewMode, setViewMode, toggleToday } = useHabitStore();
   const today = useTodayKey();
   const last5 = useLastNDays(5);
+  const [categoryFilter, setCategoryFilter] = useState<HabitCategoryFilter>(null);
   const [detailId, setDetailId] = useState<number | null>(null);
   const [isDetailDrawerOpen, setIsDetailDrawerOpen] = useState(false);
   const detailCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
+  const filterChips = useMemo(
+    () => buildHomeCategoryFilterChips(habits),
+    [habits],
+  );
+
+  useEffect(() => {
+    if (categoryFilter === null) return;
+    const stillValid = filterChips.some((c) =>
+      categoryFiltersEqual(categoryFilter, c.filter),
+    );
+    if (!stillValid) setCategoryFilter(null);
+  }, [categoryFilter, filterChips]);
+
+  const filteredHabits = useMemo(
+    () => habits.filter((h) => habitMatchesCategoryFilter(h, categoryFilter)),
+    [habits, categoryFilter],
+  );
+
   const detailHabit = habits.find((h) => h.id === detailId) ?? null;
 
   const openDetail = useCallback((id: number) => {
@@ -51,6 +77,12 @@ export const HomePage = () => {
     <>
       <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-background">
         <HabitTopBar />
+
+        <HabitCategoryFilterBar
+          habits={habits}
+          value={categoryFilter}
+          onChange={setCategoryFilter}
+        />
 
         {viewMode === "list" ? (
           <div className="flex shrink-0 items-center gap-2 px-4 pb-2.5">
@@ -92,9 +124,22 @@ export const HomePage = () => {
                 Новая привычка
               </Button>
             </div>
+          ) : filteredHabits.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
+              <p className="text-muted-foreground">
+                Нет привычек в выбранной категории.
+              </p>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setCategoryFilter(null)}
+              >
+                Показать все
+              </Button>
+            </div>
           ) : viewMode === "grid" ? (
             <div className="flex flex-col gap-2.5">
-              {habits.map((h) => (
+              {filteredHabits.map((h) => (
                 <HabitCard
                   key={h.id}
                   habit={h}
@@ -106,7 +151,7 @@ export const HomePage = () => {
             </div>
           ) : viewMode === "list" ? (
             <div className="flex flex-col gap-2.5">
-              {habits.map((h) => (
+              {filteredHabits.map((h) => (
                 <HabitListRow
                   key={h.id}
                   habit={h}
@@ -118,7 +163,7 @@ export const HomePage = () => {
             </div>
           ) : (
             <div className="flex gap-2.5">
-              {habits.map((h) => (
+              {filteredHabits.map((h) => (
                 <HabitMiniCard
                   key={h.id}
                   habit={h}

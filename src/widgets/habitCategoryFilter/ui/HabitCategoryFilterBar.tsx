@@ -33,7 +33,7 @@ export const HabitCategoryFilterBar = ({
   if (chips.length <= 1) return null;
 
   return (
-    <div className="shrink-0 border-b border-border bg-background/95 px-4 py-2.5 backdrop-blur-sm">
+    <div className="shrink-0 bg-background/95 px-4 py-2.5 backdrop-blur-sm">
       <div
         className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-0.5 pt-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         role="tablist"

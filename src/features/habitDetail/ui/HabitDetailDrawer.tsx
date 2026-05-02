@@ -1,8 +1,5 @@
 import type { Habit } from "@/entities/habit";
-import {
-  Drawer,
-  DrawerContent,
-} from "@/shared/ui/shadCNComponents/ui/drawer";
+import { Drawer, DrawerContent } from "@/shared/ui/shadCNComponents/ui/drawer";
 import { HabitDetailContent } from "./HabitDetailContent";
 
 interface HabitDetailDrawerProps {
@@ -22,7 +19,7 @@ export const HabitDetailDrawer = ({
 }: HabitDetailDrawerProps) => {
   return (
     <Drawer open={open} onOpenChange={onOpenChange} repositionInputs={false}>
-      <DrawerContent className="max-h-[90dvh] gap-0 border-0 bg-transparent p-0 shadow-none data-[vaul-drawer-direction=bottom]:mt-0">
+      <DrawerContent className="border-0! bg-transparent p-0 shadow-none ">
         {habit ? (
           <HabitDetailContent
             habit={habit}

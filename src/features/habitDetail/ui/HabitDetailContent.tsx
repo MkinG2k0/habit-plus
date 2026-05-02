@@ -7,14 +7,15 @@ import {
   type ReactNode,
 } from "react";
 import type { Habit } from "@/entities/habit";
+import { useHabitStore } from "@/entities/habit";
 import { DotGrid } from "@/shared/ui/habitDotGrid/DotGrid";
 import { HabitIcon } from "@/shared/ui/habitIcon/HabitIcon";
 import { Button } from "@/shared/ui/shadCNComponents/ui/button";
-import { Card, CardContent } from "@/shared/ui/shadCNComponents/ui/card";
 import { cn } from "@/shared/ui/lib/utils";
 import type { Swiper as SwiperClass } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
+import { Separator } from "@radix-ui/react-separator";
 
 const MONTH_NAMES_RU = [
   "Янв",
@@ -47,17 +48,61 @@ function addMonths(date: Date, months: number): Date {
   return new Date(date.getFullYear(), date.getMonth() + months, 1);
 }
 
+function calendarMonthDiff(fromMonthStart: Date, toMonthStart: Date): number {
+  return (
+    (toMonthStart.getFullYear() - fromMonthStart.getFullYear()) * 12 +
+    (toMonthStart.getMonth() - fromMonthStart.getMonth())
+  );
+}
+
+const CALENDAR_SWIPER_SPEED = 280;
+
+/** Локальная дата YYYY-MM-DD (как в completions). */
+function formatLocalDateStr(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+/** 6 недель × 7 дней с понедельника: хвост прошлого месяца + месяц + начало следующего. */
+/** Фон отмеченного дня: тот же оттенок привычки, но темнее (число дня без изменений). */
+function habitDoneCellBackground(habitColor: string): string {
+  return `color-mix(in oklab, ${habitColor} 60%, black)`;
+}
+
+function buildSixWeekCells(
+  year: number,
+  month: number,
+): { date: Date; inCurrentMonth: boolean }[] {
+  const firstWeekdayMon0 = (new Date(year, month, 1).getDay() + 6) % 7;
+  const cells: { date: Date; inCurrentMonth: boolean }[] = [];
+  for (let i = 0; i < 42; i++) {
+    const date = new Date(year, month, 1 - firstWeekdayMon0 + i);
+    cells.push({
+      date,
+      inCurrentMonth: date.getMonth() === month && date.getFullYear() === year,
+    });
+  }
+  return cells;
+}
+
 export const HabitDetailContent = ({
   habit,
   onClose,
   onEdit,
   onOpenReminders,
 }: HabitDetailContentProps) => {
-  const [centerMonth, setCenterMonth] = useState(() => startOfMonth(new Date()));
+  const toggleDateCompletion = useHabitStore((s) => s.toggleDateCompletion);
+  const [centerMonth, setCenterMonth] = useState(() =>
+    startOfMonth(new Date()),
+  );
   const swiperRef = useRef<SwiperClass | null>(null);
   const shouldRecenterSwiperRef = useRef(false);
+  const jumpToTodayRef = useRef<{
+    remaining: number;
+    direction: 1 | -1;
+  } | null>(null);
 
   useEffect(() => {
+    jumpToTodayRef.current = null;
     setCenterMonth(startOfMonth(new Date()));
   }, [habit.id]);
 
@@ -77,19 +122,66 @@ export const HabitDetailContent = ({
       shouldRecenterSwiperRef.current = true;
       setCenterMonth((c) => addMonths(c, 1));
     }
+
+    const jump = jumpToTodayRef.current;
+    if (
+      jump &&
+      (sw.activeIndex === 0 || sw.activeIndex === 2) &&
+      jump.remaining > 0
+    ) {
+      jump.remaining -= 1;
+      if (jump.remaining <= 0) {
+        jumpToTodayRef.current = null;
+        return;
+      }
+      const dir = jump.direction;
+      queueMicrotask(() => {
+        const instance = swiperRef.current;
+        if (!instance || !jumpToTodayRef.current) return;
+        if (dir === 1) instance.slideNext();
+        else instance.slidePrev();
+      });
+    }
   }, []);
 
   const goPrevMonth = useCallback(() => {
+    jumpToTodayRef.current = null;
     swiperRef.current?.slidePrev();
   }, []);
 
   const goNextMonth = useCallback(() => {
+    jumpToTodayRef.current = null;
     swiperRef.current?.slideNext();
   }, []);
 
+  const goToCurrentMonth = useCallback(() => {
+    const sw = swiperRef.current;
+    if (!sw) return;
+
+    const target = startOfMonth(new Date());
+    const diff = calendarMonthDiff(centerMonth, target);
+
+    if (diff === 0) {
+      sw.slideTo(1, CALENDAR_SWIPER_SPEED, false);
+      return;
+    }
+
+    jumpToTodayRef.current = {
+      remaining: Math.abs(diff),
+      direction: diff > 0 ? 1 : -1,
+    };
+
+    requestAnimationFrame(() => {
+      const instance = swiperRef.current;
+      if (!instance || !jumpToTodayRef.current) return;
+      if (diff > 0) instance.slideNext();
+      else instance.slidePrev();
+    });
+  }, [centerMonth]);
+
   return (
-    <div className="flex max-h-[88dvh] flex-col overflow-y-auto rounded-t-3xl border border-border bg-card px-4 pb-8 pt-5 text-card-foreground">
-      <div className="mb-4 flex items-center gap-3">
+    <div className="flex max-h-[88dvh] gap-4 m-2 flex-col overflow-y-auto rounded-3xl border border-border bg-card px-4 pb-8 pt-5 text-card-foreground">
+      <div className="flex items-center gap-3">
         <div
           className="flex size-10 shrink-0 items-center justify-center rounded-2xl"
           style={{ backgroundColor: `${habit.color}22` }}
@@ -114,18 +206,14 @@ export const HabitDetailContent = ({
         </Button>
       </div>
 
-      <Card className="mb-3 border shadow-none">
-        <CardContent className="px-3 py-3">
-          <DotGrid
-            completions={habit.completions}
-            color={habit.color}
-            dotSize={8}
-            gap={3}
-          />
-        </CardContent>
-      </Card>
+      <DotGrid
+        completions={habit.completions}
+        color={habit.color}
+        dotSize={8}
+        gap={3}
+      />
 
-      <div className="mb-4 flex items-center gap-2">
+      <div className=" flex items-center gap-2">
         <Chip>Нет цели серии</Chip>
         <Chip>💧 0</Chip>
         <div className="flex-1" />
@@ -152,127 +240,149 @@ export const HabitDetailContent = ({
         </Button>
       </div>
 
-      <Card className="border shadow-none">
-        <CardContent className="px-3.5 py-3.5">
-          <div className="mb-2.5 grid grid-cols-7 gap-1">
-            {DAY_NAMES_RU.map((d) => (
-              <div
-                key={d}
-                className="text-center text-xs font-medium text-muted-foreground"
-              >
-                {d}
-              </div>
-            ))}
-          </div>
-          <Swiper
-            key={habit.id}
-            className="habit-calendar-swiper w-full overflow-hidden"
-            slidesPerView={1}
-            spaceBetween={0}
-            initialSlide={1}
-            speed={280}
-            resistanceRatio={0.85}
-            onSwiper={(instance) => {
-              swiperRef.current = instance;
-            }}
-            onSlideChangeTransitionEnd={handleSlideChangeEnd}
+      <Separator />
+
+      <div className="grid grid-cols-7 gap-1">
+        {DAY_NAMES_RU.map((d) => (
+          <div
+            key={d}
+            className="text-center text-xs font-medium text-muted-foreground"
           >
-            {[-1, 0, 1].map((delta) => {
-              const viewMonth = addMonths(centerMonth, delta);
-              const y = viewMonth.getFullYear();
-              const m = viewMonth.getMonth();
-              return (
-                <SwiperSlide key={delta}>
-                  <MonthDayGrid habit={habit} year={y} month={m} />
-                </SwiperSlide>
-              );
-            })}
-          </Swiper>
-          <div className="mt-3 flex items-center">
-            <Chip>📅 {monthLabel}</Chip>
-            <div className="flex-1" />
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="secondary"
-                size="icon"
-                className="size-9 rounded-lg border border-border text-lg"
-                onClick={goPrevMonth}
-                aria-label="Предыдущий месяц"
-              >
-                ‹
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                size="icon"
-                className="size-9 rounded-lg border border-border text-lg"
-                onClick={goNextMonth}
-                aria-label="Следующий месяц"
-              >
-                ›
-              </Button>
-            </div>
+            {d}
           </div>
-        </CardContent>
-      </Card>
+        ))}
+      </div>
+      <Swiper
+        key={habit.id}
+        className="habit-calendar-swiper w-full overflow-hidden"
+        slidesPerView={1}
+        spaceBetween={0}
+        initialSlide={1}
+        speed={CALENDAR_SWIPER_SPEED}
+        resistanceRatio={0.85}
+        threshold={14}
+        touchAngle={60}
+        onSwiper={(instance) => {
+          swiperRef.current = instance;
+        }}
+        onTouchStart={() => {
+          jumpToTodayRef.current = null;
+        }}
+        onSlideChangeTransitionEnd={handleSlideChangeEnd}
+      >
+        {[-1, 0, 1].map((delta) => {
+          const viewMonth = addMonths(centerMonth, delta);
+          const y = viewMonth.getFullYear();
+          const m = viewMonth.getMonth();
+          return (
+            <SwiperSlide key={delta}>
+              <MonthDayGrid
+                habit={habit}
+                year={y}
+                month={m}
+                onToggleDay={(dateStr) =>
+                  toggleDateCompletion(habit.id, dateStr)
+                }
+              />
+            </SwiperSlide>
+          );
+        })}
+      </Swiper>
+
+      <div className=" flex items-center">
+        <Button
+          type="button"
+          variant="secondary"
+          className="h-9 shrink-0 gap-2 rounded-lg border border-border px-3 font-normal"
+          onClick={goToCurrentMonth}
+          aria-label="Перейти к текущему месяцу"
+        >
+          <CalendarIcon />
+          <span className="text-sm text-foreground">{monthLabel}</span>
+        </Button>
+        <div className="flex-1" />
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="secondary"
+            size="icon"
+            className="size-9 rounded-lg border border-border text-lg"
+            onClick={goPrevMonth}
+            aria-label="Предыдущий месяц"
+          >
+            ‹
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            size="icon"
+            className="size-9 rounded-lg border border-border text-lg"
+            onClick={goNextMonth}
+            aria-label="Следующий месяц"
+          >
+            ›
+          </Button>
+        </div>
+      </div>
     </div>
   );
-}
+};
 
 function MonthDayGrid({
   habit,
   year,
   month,
+  onToggleDay,
 }: {
   habit: Habit;
   year: number;
   month: number;
+  onToggleDay: (dateStr: string) => void;
 }) {
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7;
+  const cells = buildSixWeekCells(year, month);
   const today = new Date();
 
   return (
-    <div className="grid grid-cols-7 gap-1">
-      {Array.from({ length: firstWeekday }, (_, i) => (
-        <div key={`cal-pad-${habit.id}-${year}-${month}-${String(i)}`} />
-      ))}
-      {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
-        const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    <div className="grid grid-cols-7 grid-rows-6 gap-1">
+      {cells.map(({ date, inCurrentMonth }) => {
+        const dateStr = formatLocalDateStr(date);
         const done = habit.completions[dateStr] ?? false;
         const isToday =
-          day === today.getDate() &&
-          month === today.getMonth() &&
-          year === today.getFullYear();
+          date.getDate() === today.getDate() &&
+          date.getMonth() === today.getMonth() &&
+          date.getFullYear() === today.getFullYear();
 
         return (
-          <div
-            key={day}
+          <button
+            key={dateStr}
+            type="button"
+            onClick={() => onToggleDay(dateStr)}
             className={cn(
-              "flex h-9 flex-col items-center justify-center rounded-md",
+              "flex h-9 items-center justify-center rounded-md border border-transparent text-sm transition-colors",
+              "cursor-pointer touch-manipulation",
+              !done && "hover:bg-muted/80 active:bg-muted",
+              !done &&
+                (inCurrentMonth ? "text-foreground" : "text-muted-foreground"),
               isToday && !done && "bg-muted",
-              isToday && done && "font-bold text-white",
+              done && "font-medium text-white",
+              isToday &&
+                done &&
+                "font-bold ring-2 ring-background ring-offset-1 ring-offset-card",
             )}
             style={
-              isToday && done ? { backgroundColor: habit.color } : undefined
+              done
+                ? { backgroundColor: habitDoneCellBackground(habit.color) }
+                : undefined
             }
+            aria-label={
+              done
+                ? `Снять отметку ${dateStr}`
+                : `Отметить выполнение ${dateStr}`
+            }
+            aria-pressed={done}
           >
-            <span
-              className={cn(
-                "text-sm",
-                isToday ? "font-bold" : "font-normal text-foreground",
-              )}
-            >
-              {day}
-            </span>
-            {done && !isToday ? (
-              <div
-                className="mt-0.5 size-1.5 rounded-full"
-                style={{ backgroundColor: habit.color }}
-              />
-            ) : null}
-          </div>
+            {date.getDate()}
+          </button>
         );
       })}
     </div>
@@ -284,6 +394,26 @@ function Chip({ children }: { children: ReactNode }) {
     <div className="flex items-center gap-1.5 rounded-md bg-muted px-3.5 py-2">
       <span className="text-sm text-foreground">{children}</span>
     </div>
+  );
+}
+
+function CalendarIcon() {
+  return (
+    <svg
+      width={16}
+      height={16}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="shrink-0 text-muted-foreground"
+      aria-hidden
+    >
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+      <path d="M16 2v4M8 2v4M3 10h18" />
+    </svg>
   );
 }
 

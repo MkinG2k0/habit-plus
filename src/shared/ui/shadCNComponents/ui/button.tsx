@@ -57,4 +57,6 @@ function Button({
   );
 }
 
+// buttonVariants: shared cva contract (shadcn pattern)
+// eslint-disable-next-line react-refresh/only-export-components -- allow variant export alongside Button
 export { Button, buttonVariants };

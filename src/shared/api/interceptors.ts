@@ -18,11 +18,11 @@ $api.interceptors.response.use(
     return response;
   },
   async (error) => {
-    const originalRequest = error.config || {};
     const status = error?.response?.status;
 
     if (status === 401) {
       try {
+        // const originalRequest = error.config || {};
         // const { data: newToken } = await refreshTokensRequest();
         // if (newToken) {
         //   useUserStore.getState().setAccessToken(newToken);

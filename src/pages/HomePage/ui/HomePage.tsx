@@ -75,7 +75,6 @@ export const HomePage = () => {
   const handleToggleHabitDay = useCallback(
     (habit: Habit, dateKey: string) => {
       if (habit.trackingMode === "custom") {
-        setIsDetailDrawerOpen(false);
         setCustomValueTarget({ habitId: habit.id, dateKey });
         return;
       }

@@ -8,6 +8,7 @@ import {
   type HabitIconId,
 } from "@/entities/habit";
 import { HabitCategoriesField } from "@/features/habitCategories";
+import { HabitStreakGoalField } from "@/features/habitStreakGoal";
 import { HabitIconPickerDrawer } from "@/features/habitIconPicker";
 import { Button } from "@/shared/ui/shadCNComponents/ui/button";
 import { Card, CardContent } from "@/shared/ui/shadCNComponents/ui/card";
@@ -33,7 +34,9 @@ export const EditHabitPage = () => {
   const [categoryTags, setCategoryTags] = useState<HabitCategoryTag[]>(
     existing?.categoryTags ?? [],
   );
-  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [streakGoal, setStreakGoal] = useState<number | undefined>(
+    existing?.streakGoal,
+  );
 
   const bgIconPattern = useMemo(
     () =>
@@ -55,6 +58,8 @@ export const EditHabitPage = () => {
         color,
         icon,
         categoryTags: categoryTags.length ? categoryTags : undefined,
+        streakGoal:
+          streakGoal != null && streakGoal > 0 ? streakGoal : undefined,
       });
     } else {
       updateHabit(Number(id), {
@@ -63,6 +68,8 @@ export const EditHabitPage = () => {
         color,
         icon,
         categoryTags: categoryTags.length ? categoryTags : undefined,
+        streakGoal:
+          streakGoal != null && streakGoal > 0 ? streakGoal : undefined,
       });
     }
     navigate("/");
@@ -200,7 +207,7 @@ export const EditHabitPage = () => {
               isNew ? "grid-cols-1" : "grid-cols-2",
             )}
           >
-            <AdvField label="Цель серии" value="Нет" />
+            <HabitStreakGoalField value={streakGoal} onChange={setStreakGoal} />
             {!isNew ? (
               <button
                 type="button"
@@ -256,31 +263,6 @@ export const EditHabitPage = () => {
     </div>
   );
 };
-
-function AdvField({
-  label,
-  value,
-  fullWidth,
-}: {
-  label: string;
-  value: string;
-  fullWidth?: boolean;
-}) {
-  return (
-    <div
-      className={cn(
-        "rounded-lg border border-border bg-card px-3 py-2.5",
-        fullWidth && "col-span-2",
-      )}
-    >
-      <div className="text-[11px] text-muted-foreground">{label}</div>
-      <div className="mt-0.5 flex items-center justify-between text-[13px] text-foreground">
-        <span>{value}</span>
-        <ChevronIcon />
-      </div>
-    </div>
-  );
-}
 
 function ChevronIcon() {
   return (

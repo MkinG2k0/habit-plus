@@ -63,13 +63,6 @@ export const HabitStreakGoalField = ({
 
   const summary = formatStreakGoalSummary(value);
 
-  const applyCustom = () => {
-    const parsed = Number.parseInt(customRaw.trim(), 10);
-    if (Number.isFinite(parsed) && parsed >= 1 && parsed <= 9999) {
-      setDraft(parsed);
-    }
-  };
-
   const handleDone = () => {
     handleOpenChange(false);
   };
@@ -158,25 +151,17 @@ export const HabitStreakGoalField = ({
               <p className="text-xs font-medium text-muted-foreground">
                 Своё значение
               </p>
-              <div className="mt-2 flex gap-2">
-                <Input
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  placeholder="Например, 45"
-                  value={customRaw}
-                  onChange={(e) => setCustomRaw(e.target.value.replace(/\D/g, ""))}
-                  className="h-11 min-w-0 flex-1 rounded-lg"
-                  maxLength={4}
-                />
-                <Button
-                  type="button"
-                  variant="secondary"
-                  className="h-11 shrink-0 px-4"
-                  onClick={applyCustom}
-                >
-                  ОК
-                </Button>
-              </div>
+              <Input
+                inputMode="numeric"
+                pattern="[0-9]*"
+                placeholder="Например, 45"
+                value={customRaw}
+                onChange={(e) =>
+                  setCustomRaw(e.target.value.replace(/\D/g, ""))
+                }
+                className="mt-2 h-11 w-full rounded-lg"
+                maxLength={4}
+              />
               <p className="mt-1.5 text-xs text-muted-foreground">
                 От 1 до 9999 дней
               </p>

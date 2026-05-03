@@ -25,6 +25,10 @@ export {
   HABIT_PRESET_CATEGORY_IDS,
   HABIT_PRESET_CATEGORY_LABELS,
 } from "./model/habitPresetCategories";
-export { DEFAULT_HABIT_COLOR, HABIT_COLOR_OPTIONS } from "./model/habitColors";
+export {
+  DEFAULT_HABIT_COLOR,
+  foregroundOnHabitColor,
+  HABIT_COLOR_OPTIONS,
+} from "./model/habitColors";
 export { useHabitStore } from "./slice/habitStore";
 export { useHabitCategoryCatalogStore } from "./slice/habitCategoryCatalogStore";

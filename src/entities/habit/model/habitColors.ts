@@ -21,3 +21,21 @@ export const HABIT_COLOR_OPTIONS: string[] = [
 ];
 
 export const DEFAULT_HABIT_COLOR = "#22c55e";
+
+/** Текст на заливке `bgHex` (палитра привычек — #RGB / #RRGGBB). */
+export function foregroundOnHabitColor(bgHex: string): "#0a0a0a" | "#fafafa" {
+  const raw = bgHex.trim().replace("#", "");
+  const hex =
+    raw.length === 3
+      ? `${raw[0]}${raw[0]}${raw[1]}${raw[1]}${raw[2]}${raw[2]}`
+      : raw.length === 6
+        ? raw
+        : "";
+  if (hex.length !== 6) return "#fafafa";
+  const r = Number.parseInt(hex.slice(0, 2), 16);
+  const g = Number.parseInt(hex.slice(2, 4), 16);
+  const b = Number.parseInt(hex.slice(4, 6), 16);
+  if ([r, g, b].some((x) => Number.isNaN(x))) return "#fafafa";
+  const y = (r * 299 + g * 587 + b * 114) / 1000;
+  return y >= 150 ? "#0a0a0a" : "#fafafa";
+}

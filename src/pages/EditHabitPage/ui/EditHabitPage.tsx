@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   DEFAULT_HABIT_COLOR,
+  foregroundOnHabitColor,
   HABIT_COLOR_OPTIONS,
   useHabitStore,
   type HabitCategoryTag,
@@ -54,6 +55,8 @@ export const EditHabitPage = () => {
       }),
     [],
   );
+
+  const accentLabelColor = useMemo(() => foregroundOnHabitColor(color), [color]);
 
   const canSave = name.trim().length > 0;
 
@@ -239,11 +242,20 @@ export const EditHabitPage = () => {
                   onClick={() => setTrackingMode("step")}
                   aria-pressed={trackingMode !== "custom"}
                   className={cn(
-                    "cursor-pointer rounded-md border py-2 text-center text-sm font-medium transition-colors",
+                    "cursor-pointer rounded-md border py-2 text-center text-sm font-medium transition-[filter,colors]",
                     trackingMode !== "custom"
-                      ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                      ? "shadow-sm hover:brightness-110 active:brightness-95"
                       : "border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground",
                   )}
+                  style={
+                    trackingMode !== "custom"
+                      ? {
+                          backgroundColor: color,
+                          borderColor: color,
+                          color: accentLabelColor,
+                        }
+                      : undefined
+                  }
                 >
                   Пошагово
                 </button>
@@ -252,11 +264,20 @@ export const EditHabitPage = () => {
                   onClick={() => setTrackingMode("custom")}
                   aria-pressed={trackingMode === "custom"}
                   className={cn(
-                    "cursor-pointer rounded-md border py-2 text-center text-sm font-medium transition-colors",
+                    "cursor-pointer rounded-md border py-2 text-center text-sm font-medium transition-[filter,colors]",
                     trackingMode === "custom"
-                      ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                      ? "shadow-sm hover:brightness-110 active:brightness-95"
                       : "border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground",
                   )}
+                  style={
+                    trackingMode === "custom"
+                      ? {
+                          backgroundColor: color,
+                          borderColor: color,
+                          color: accentLabelColor,
+                        }
+                      : undefined
+                  }
                 >
                   Своё значение
                 </button>
@@ -292,7 +313,13 @@ export const EditHabitPage = () => {
       <div className="shrink-0 border-t border-border px-4 pb-5 pt-3">
         <Button
           type="button"
-          className="h-[52px] w-full text-base font-semibold"
+          variant="secondary"
+          className="h-[52px] w-full rounded-lg text-base font-semibold transition-[filter] hover:brightness-110 active:brightness-95"
+          style={{
+            backgroundColor: color,
+            borderColor: color,
+            color: accentLabelColor,
+          }}
           disabled={!canSave}
           onClick={handleSave}
         >

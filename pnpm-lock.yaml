@@ -38,9 +38,6 @@ importers:
       '@capacitor/status-bar':
         specifier: ^8.0.2
         version: 8.0.2(@capacitor/core@8.3.1)
-      '@capgo/capacitor-health':
-        specifier: ^8.4.6
-        version: 8.4.6(@capacitor/core@8.3.1)
       '@emotion/react':
         specifier: ^11.14.0
         version: 11.14.0(@types/react@19.2.14)(react@19.2.5)
@@ -816,11 +813,6 @@ packages:
 
   '@capacitor/synapse@1.0.4':
     resolution: {integrity: sha512-/C1FUo8/OkKuAT4nCIu/34ny9siNHr9qtFezu4kxm6GY1wNFxrCFWjfYx5C1tUhVGz3fxBABegupkpjXvjCHrw==}
-
-  '@capgo/capacitor-health@8.4.6':
-    resolution: {integrity: sha512-8lCiaGhrBvgoyo3Qre3gX3sJ97EuZfc/DOfGOYBZ7RbGq19VqntkV+JsLTClZBMq7XEkBlOInSrm27aG+rZuEQ==}
-    peerDependencies:
-      '@capacitor/core': '>=8.0.0'
 
   '@dotenvx/dotenvx@1.61.0':
     resolution: {integrity: sha512-utL3cpZoFzflyqUkjYbxYujI6STBTmO5LFn4bbin/NZnRWN6wQ7eErhr3/Vpa5h/jicPFC6kTa42r940mQftJQ==}
@@ -5438,10 +5430,6 @@ snapshots:
       '@capacitor/core': 8.3.1
 
   '@capacitor/synapse@1.0.4': {}
-
-  '@capgo/capacitor-health@8.4.6(@capacitor/core@8.3.1)':
-    dependencies:
-      '@capacitor/core': 8.3.1
 
   '@dotenvx/dotenvx@1.61.0':
     dependencies:

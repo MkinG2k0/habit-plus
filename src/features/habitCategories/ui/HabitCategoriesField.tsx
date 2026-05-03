@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  HABIT_PRESET_CATEGORY_IDS,
-  HABIT_PRESET_CATEGORY_LABELS,
+  isPresetCategoryId,
+  useHabitCategoryCatalogStore,
+  type AppCategoryCatalogEntry,
   type HabitCategoryTag,
 } from "@/entities/habit";
 import { Button } from "@/shared/ui/shadCNComponents/ui/button";
@@ -48,23 +49,56 @@ export const HabitCategoriesField = ({
   );
   const [iconSearch, setIconSearch] = useState("");
 
+  const catalogItems = useHabitCategoryCatalogStore((s) => s.items);
+  const bootstrapCatalog = useHabitCategoryCatalogStore(
+    (s) => s.bootstrapCatalog,
+  );
+  const addUserCategory = useHabitCategoryCatalogStore(
+    (s) => s.addUserCategory,
+  );
+  const ensureFromHabitTags = useHabitCategoryCatalogStore(
+    (s) => s.ensureFromHabitTags,
+  );
+
+  const draftRef = useRef(draft);
+  draftRef.current = draft;
+
   useEffect(() => {
     if (open) {
+      bootstrapCatalog();
       setDraft(value);
       setView("main");
       setCustomLabel("");
       setCustomIconName(DEFAULT_CUSTOM_ICON_NAME);
       setIconSearch("");
+      ensureFromHabitTags(value);
     }
-  }, [open, value]);
+  }, [open, value, bootstrapCatalog, ensureFromHabitTags]);
 
   const summary = useMemo(() => formatCategoryTagsSummary(value), [value]);
 
   const filteredIcons = useMemo(() => {
     const q = iconSearch.trim().toLowerCase();
     if (!q) return CATEGORY_PICKER_ICONS;
-    return CATEGORY_PICKER_ICONS.filter((e) => e.name.toLowerCase().includes(q));
+    return CATEGORY_PICKER_ICONS.filter((e) =>
+      e.name.toLowerCase().includes(q),
+    );
   }, [iconSearch]);
+
+  const catalogIds = useMemo(
+    () => new Set(catalogItems.map((e) => e.id)),
+    [catalogItems],
+  );
+
+  /** Свои теги в черновике, которых ещё нет в библиотеке (старые данные до библиотеки). */
+  const orphanCustomDraftTags = useMemo(
+    () =>
+      draft.filter(
+        (t): t is Extract<HabitCategoryTag, { type: "custom" }> =>
+          t.type === "custom" && !catalogIds.has(t.id),
+      ),
+    [draft, catalogIds],
+  );
 
   const handleOpenCustom = () => {
     setCustomLabel("");
@@ -75,30 +109,63 @@ export const HabitCategoriesField = ({
   const handleAddCustom = () => {
     const label = customLabel.trim();
     if (!label) return;
+    const id = crypto.randomUUID();
+    addUserCategory({
+      id,
+      label,
+      iconName: customIconName,
+    });
     setDraft((prev) => [
       ...prev,
-      {
-        type: "custom",
-        id: crypto.randomUUID(),
-        label,
-        iconName: customIconName,
-      },
+      { type: "custom", id, label, iconName: customIconName },
     ]);
     setView("main");
   };
 
+  const toggleCatalogEntryInDraft = (entry: AppCategoryCatalogEntry) => {
+    if (entry.kind === "default" && isPresetCategoryId(entry.id)) {
+      setDraft((prev) => togglePresetInTags(prev, entry.id));
+      return;
+    }
+    if (entry.kind === "user" && entry.iconName) {
+      setDraft((prev) => {
+        const has = prev.some((t) => t.type === "custom" && t.id === entry.id);
+        if (has) {
+          return prev.filter(
+            (t) => !(t.type === "custom" && t.id === entry.id),
+          );
+        }
+        return [
+          ...prev,
+          {
+            type: "custom" as const,
+            id: entry.id,
+            label: entry.label,
+            iconName: entry.iconName,
+          },
+        ];
+      });
+    }
+  };
+
+  const handleDrawerOpenChange = (next: boolean) => {
+    if (!next) {
+      onChange(draftRef.current);
+    }
+    setOpen(next);
+  };
+
   const handleSaveMain = () => {
-    onChange(draft);
-    setOpen(false);
+    handleDrawerOpenChange(false);
   };
 
   return (
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={() => handleDrawerOpenChange(true)}
         className={cn(
-          "rounded-lg border border-border bg-card px-3 py-2.5 text-left transition-colors",
+          "rounded-lg border border-border bg-card px-3 py-2.5 text-left transition-colors w-full",
           "hover:bg-muted/40 active:bg-muted/60",
         )}
       >
@@ -109,7 +176,7 @@ export const HabitCategoriesField = ({
         </div>
       </button>
 
-      <Drawer open={open} onOpenChange={setOpen}>
+      <Drawer open={open} onOpenChange={handleDrawerOpenChange}>
         <DrawerContent className="max-h-[85vh]">
           {view === "main" ? (
             <>
@@ -122,27 +189,87 @@ export const HabitCategoriesField = ({
               </DrawerHeader>
               <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-2">
                 <div className="flex flex-wrap gap-2">
-                  {HABIT_PRESET_CATEGORY_IDS.map((id) => {
-                    const selected = isPresetSelected(draft, id);
-                    return (
-                      <button
-                        key={id}
-                        type="button"
-                        onClick={() =>
-                          setDraft((prev) => togglePresetInTags(prev, id))
-                        }
-                        className={cn(
-                          "inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm transition-colors",
-                          selected
-                            ? "border-primary bg-primary/15 text-foreground"
-                            : "border-border bg-card text-foreground",
-                        )}
-                      >
-                        <PresetCategoryIcon id={id} size={16} />
-                        {HABIT_PRESET_CATEGORY_LABELS[id]}
-                      </button>
-                    );
+                  {catalogItems.map((entry) => {
+                    if (
+                      entry.kind === "default" &&
+                      isPresetCategoryId(entry.id)
+                    ) {
+                      const selected = isPresetSelected(draft, entry.id);
+                      return (
+                        <button
+                          key={entry.id}
+                          type="button"
+                          onClick={() => toggleCatalogEntryInDraft(entry)}
+                          className={cn(
+                            "inline-flex max-w-full items-center gap-2 rounded-full border px-3 py-2 text-sm transition-colors",
+                            selected
+                              ? "border-primary bg-primary/15 text-foreground"
+                              : "border-border bg-card text-foreground",
+                          )}
+                          aria-pressed={selected}
+                        >
+                          <PresetCategoryIcon id={entry.id} size={16} />
+                          <span className="min-w-0 truncate">
+                            {entry.label}
+                          </span>
+                        </button>
+                      );
+                    }
+                    if (entry.kind === "user" && entry.iconName) {
+                      const selected = draft.some(
+                        (t) => t.type === "custom" && t.id === entry.id,
+                      );
+                      return (
+                        <button
+                          key={entry.id}
+                          type="button"
+                          onClick={() => toggleCatalogEntryInDraft(entry)}
+                          className={cn(
+                            "inline-flex max-w-full items-center gap-2 rounded-full border px-3 py-2 text-sm transition-colors",
+                            selected
+                              ? "border-primary bg-primary/15 text-foreground"
+                              : "border-border bg-card text-foreground",
+                          )}
+                          aria-pressed={selected}
+                        >
+                          <CustomCategoryLucideIcon
+                            name={entry.iconName}
+                            size={16}
+                            className="shrink-0 text-foreground"
+                          />
+                          <span className="min-w-0 truncate">
+                            {entry.label}
+                          </span>
+                        </button>
+                      );
+                    }
+                    return null;
                   })}
+                  {orphanCustomDraftTags.map((tag) => (
+                    <button
+                      key={tag.id}
+                      type="button"
+                      onClick={() =>
+                        setDraft((prev) =>
+                          prev.filter(
+                            (t) => !(t.type === "custom" && t.id === tag.id),
+                          ),
+                        )
+                      }
+                      className={cn(
+                        "inline-flex max-w-full items-center gap-2 rounded-full border px-3 py-2 text-sm transition-colors",
+                        "border-primary bg-primary/15 text-foreground",
+                      )}
+                      aria-pressed
+                    >
+                      <CustomCategoryLucideIcon
+                        name={tag.iconName}
+                        size={16}
+                        className="shrink-0 text-foreground"
+                      />
+                      <span className="min-w-0 truncate">{tag.label}</span>
+                    </button>
+                  ))}
                   <button
                     type="button"
                     onClick={handleOpenCustom}

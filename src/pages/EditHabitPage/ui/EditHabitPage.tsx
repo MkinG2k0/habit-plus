@@ -161,7 +161,8 @@ export const EditHabitPage = () => {
                 onClick={() => setColor(c)}
                 className={cn(
                   "flex aspect-square items-center justify-center rounded-2xl transition-[outline]",
-                  color === c && "outline-2 outline-offset-2 outline-foreground",
+                  color === c &&
+                    "outline-2 outline-offset-2 outline-foreground",
                 )}
                 style={{ backgroundColor: c }}
                 aria-label={`Цвет ${c}`}
@@ -185,85 +186,61 @@ export const EditHabitPage = () => {
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setShowAdvanced((v) => !v)}
-          className="mt-3 flex w-full items-center justify-center gap-1 py-2 text-sm text-muted-foreground"
-        >
-          Дополнительные настройки
-          <svg
-            width={14}
-            height={14}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
+        <div className="mt-3.5">
+          <HabitCategoriesField
+            value={categoryTags}
+            onChange={setCategoryTags}
+          />
+        </div>
+
+        <div className="mt-2 flex flex-col gap-2.5">
+          <div
             className={cn(
-              "transition-transform",
-              showAdvanced && "rotate-180",
+              "grid gap-2.5",
+              isNew ? "grid-cols-1" : "grid-cols-2",
             )}
           >
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
-        </button>
-
-        {showAdvanced ? (
-          <div className="mt-2 flex flex-col gap-2.5">
-            <div
-              className={cn(
-                "grid gap-2.5",
-                isNew ? "grid-cols-1" : "grid-cols-2",
-              )}
-            >
-              <AdvField label="Цель серии" value="Нет" />
-              {!isNew ? (
-                <button
-                  type="button"
-                  onClick={() => navigate(`/edit/${id}/reminders`)}
-                  className="rounded-lg border border-border bg-card px-3 py-2.5 text-left"
-                >
-                  <div className="text-[11px] text-muted-foreground">
-                    Напоминание
-                  </div>
-                  <div className="mt-0.5 flex items-center justify-between text-[13px] text-foreground">
-                    <span>1 Активных</span>
-                    <ChevronIcon />
-                  </div>
-                </button>
-              ) : null}
-            </div>
-            <div className="col-span-2">
-              <HabitCategoriesField
-                value={categoryTags}
-                onChange={setCategoryTags}
-              />
-            </div>
-            <Card className="border shadow-none">
-              <CardContent className="px-3 py-3">
-                <div className="mb-2.5 text-sm text-foreground">
-                  Как отслеживать выполнения?
+            <AdvField label="Цель серии" value="Нет" />
+            {!isNew ? (
+              <button
+                type="button"
+                onClick={() => navigate(`/edit/${id}/reminders`)}
+                className="rounded-lg border border-border bg-card px-3 py-2.5 text-left"
+              >
+                <div className="text-[11px] text-muted-foreground">
+                  Напоминание
                 </div>
-                <div className="grid grid-cols-2 gap-1.5">
-                  {["Пошагово", "Своё значение"].map((label) => (
-                    <div
-                      key={label}
-                      className={cn(
-                        "cursor-pointer rounded-md border border-border py-2 text-center text-sm",
-                        label === "Пошагово" && "bg-muted",
-                      )}
-                    >
-                      {label}
-                    </div>
-                  ))}
+                <div className="mt-0.5 flex items-center justify-between text-[13px] text-foreground">
+                  <span>1 Активных</span>
+                  <ChevronIcon />
                 </div>
-                <p className="mt-1.5 text-center text-xs text-muted-foreground">
-                  Увеличивать на 1 с каждым выполнением
-                </p>
-              </CardContent>
-            </Card>
+              </button>
+            ) : null}
           </div>
-        ) : null}
+          <Card className="border shadow-none">
+            <CardContent className="px-3 py-3">
+              <div className="mb-2.5 text-sm text-foreground">
+                Как отслеживать выполнения?
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
+                {["Пошагово", "Своё значение"].map((label) => (
+                  <div
+                    key={label}
+                    className={cn(
+                      "cursor-pointer rounded-md border border-border py-2 text-center text-sm",
+                      label === "Пошагово" && "bg-muted",
+                    )}
+                  >
+                    {label}
+                  </div>
+                ))}
+              </div>
+              <p className="mt-1.5 text-center text-xs text-muted-foreground">
+                Увеличивать на 1 с каждым выполнением
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       <div className="shrink-0 border-t border-border px-4 pb-5 pt-3">

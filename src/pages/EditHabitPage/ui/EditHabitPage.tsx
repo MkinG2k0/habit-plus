@@ -237,9 +237,12 @@ export const EditHabitPage = () => {
                 <button
                   type="button"
                   onClick={() => setTrackingMode("step")}
+                  aria-pressed={trackingMode !== "custom"}
                   className={cn(
-                    "cursor-pointer rounded-md border border-border py-2 text-center text-sm transition-colors",
-                    trackingMode !== "custom" && "bg-muted",
+                    "cursor-pointer rounded-md border py-2 text-center text-sm font-medium transition-colors",
+                    trackingMode !== "custom"
+                      ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                      : "border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground",
                   )}
                 >
                   Пошагово
@@ -247,9 +250,12 @@ export const EditHabitPage = () => {
                 <button
                   type="button"
                   onClick={() => setTrackingMode("custom")}
+                  aria-pressed={trackingMode === "custom"}
                   className={cn(
-                    "cursor-pointer rounded-md border border-border py-2 text-center text-sm transition-colors",
-                    trackingMode === "custom" && "bg-muted",
+                    "cursor-pointer rounded-md border py-2 text-center text-sm font-medium transition-colors",
+                    trackingMode === "custom"
+                      ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                      : "border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground",
                   )}
                 >
                   Своё значение

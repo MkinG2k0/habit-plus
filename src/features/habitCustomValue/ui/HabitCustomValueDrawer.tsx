@@ -158,12 +158,14 @@ export const HabitCustomValueDrawer = ({
                 <Button
                   key={n}
                   type="button"
-                  variant="secondary"
+                  variant={stepSize === n ? "default" : "secondary"}
                   size="sm"
                   className={cn(
-                    "h-9 min-w-11 rounded-lg border border-border px-3 font-medium",
-                    stepSize === n && "border-foreground ring-1 ring-foreground",
+                    "h-9 min-w-11 rounded-lg px-3 font-semibold",
+                    stepSize === n && "shadow-sm",
+                    stepSize !== n && "border border-border",
                   )}
+                  aria-pressed={stepSize === n}
                   onClick={() => setStepSize(n)}
                 >
                   {n}

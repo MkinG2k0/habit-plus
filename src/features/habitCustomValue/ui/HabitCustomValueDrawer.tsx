@@ -63,16 +63,12 @@ export const HabitCustomValueDrawer = ({
     onOpenChange(false);
   };
 
-  const handleReset = () => {
-    if (!habit) return;
-    setHabitDayCompletionValue(habit.id, dateKey, 0);
-    onOpenChange(false);
+  const handleResetDraft = () => {
+    setDraft(0);
   };
 
-  const fillDayAndClose = () => {
-    if (!habit) return;
-    setHabitDayCompletionValue(habit.id, dateKey, goal);
-    onOpenChange(false);
+  const handleFillDayDraft = () => {
+    setDraft(goal);
   };
 
   return (
@@ -183,7 +179,7 @@ export const HabitCustomValueDrawer = ({
                   type="button"
                   variant="outline"
                   className="h-11 flex-1 rounded-xl border-border"
-                  onClick={handleReset}
+                  onClick={handleResetDraft}
                 >
                   Сбросить
                 </Button>
@@ -191,7 +187,7 @@ export const HabitCustomValueDrawer = ({
                   type="button"
                   variant="secondary"
                   className="h-11 flex-1 rounded-xl border border-border"
-                  onClick={fillDayAndClose}
+                  onClick={handleFillDayDraft}
                 >
                   Заполнить день
                 </Button>

@@ -166,7 +166,11 @@ export const HabitCustomValueDrawer = ({
                     stepSize !== n && "border border-border",
                   )}
                   aria-pressed={stepSize === n}
-                  onClick={() => setStepSize(n)}
+                  aria-label={`Прибавить ${n} к значению`}
+                  onClick={() => {
+                    setStepSize(n);
+                    setDraft((v) => Math.max(0, v + n));
+                  }}
                 >
                   {n}
                 </Button>

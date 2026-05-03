@@ -37,6 +37,14 @@ export const EditHabitPage = () => {
   const [streakGoal, setStreakGoal] = useState<number | undefined>(
     existing?.streakGoal,
   );
+  const [trackingMode, setTrackingMode] = useState<"step" | "custom">(
+    existing?.trackingMode === "custom" ? "custom" : "step",
+  );
+  const [dailyGoalInput, setDailyGoalInput] = useState(
+    existing?.dailyGoal != null && existing.dailyGoal > 0
+      ? String(existing.dailyGoal)
+      : "",
+  );
 
   const bgIconPattern = useMemo(
     () =>
@@ -51,26 +59,31 @@ export const EditHabitPage = () => {
 
   const handleSave = () => {
     if (!canSave) return;
+    const parsedGoal = Number(dailyGoalInput.replace(",", "."));
+    const dailyGoal =
+      trackingMode === "custom" &&
+      dailyGoalInput.trim() !== "" &&
+      Number.isFinite(parsedGoal) &&
+      parsedGoal > 0
+        ? Math.floor(parsedGoal)
+        : undefined;
+
+    const habitPayload = {
+      name: name.trim(),
+      desc: desc.trim(),
+      color,
+      icon,
+      categoryTags: categoryTags.length ? categoryTags : undefined,
+      streakGoal:
+        streakGoal != null && streakGoal > 0 ? streakGoal : undefined,
+      trackingMode,
+      dailyGoal,
+    };
+
     if (isNew) {
-      addHabit({
-        name: name.trim(),
-        desc: desc.trim(),
-        color,
-        icon,
-        categoryTags: categoryTags.length ? categoryTags : undefined,
-        streakGoal:
-          streakGoal != null && streakGoal > 0 ? streakGoal : undefined,
-      });
+      addHabit(habitPayload);
     } else {
-      updateHabit(Number(id), {
-        name: name.trim(),
-        desc: desc.trim(),
-        color,
-        icon,
-        categoryTags: categoryTags.length ? categoryTags : undefined,
-        streakGoal:
-          streakGoal != null && streakGoal > 0 ? streakGoal : undefined,
-      });
+      updateHabit(Number(id), habitPayload);
     }
     navigate("/");
   };
@@ -94,7 +107,7 @@ export const EditHabitPage = () => {
         <div className="size-8" />
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
+      <div className="min-h-0 flex-1 flex flex-col gap-4 overflow-y-auto px-4 py-4">
         <div className="relative mb-5 flex min-h-[136px] h-[136px] items-center justify-center sm:h-[144px]">
           <div
             className="pointer-events-none absolute inset-0 grid h-full w-full grid-cols-12 grid-rows-[repeat(7,minmax(0,1fr))] gap-0.5 overflow-hidden opacity-[0.14]"
@@ -158,7 +171,7 @@ export const EditHabitPage = () => {
           </div>
         </div>
 
-        <div className="mt-3.5">
+        <div className="">
           <Label className="text-muted-foreground">Цвет</Label>
           <div className="mt-1.5 grid grid-cols-7 gap-2">
             {HABIT_COLOR_OPTIONS.map((c) => (
@@ -193,58 +206,78 @@ export const EditHabitPage = () => {
           </div>
         </div>
 
-        <div className="mt-3.5">
-          <HabitCategoriesField
-            value={categoryTags}
-            onChange={setCategoryTags}
-          />
-        </div>
+        <div className="flex gap-2 flex-col">
+          <div className="flex gap-2.5">
+            <HabitCategoriesField
+              value={categoryTags}
+              onChange={setCategoryTags}
+            />
 
-        <div className="mt-2 flex flex-col gap-2.5">
-          <div
-            className={cn(
-              "grid gap-2.5",
-              isNew ? "grid-cols-1" : "grid-cols-2",
-            )}
-          >
             <HabitStreakGoalField value={streakGoal} onChange={setStreakGoal} />
-            {!isNew ? (
-              <button
-                type="button"
-                onClick={() => navigate(`/edit/${id}/reminders`)}
-                className="rounded-lg border border-border bg-card px-3 py-2.5 text-left"
-              >
-                <div className="text-[11px] text-muted-foreground">
-                  Напоминание
-                </div>
-                <div className="mt-0.5 flex items-center justify-between text-[13px] text-foreground">
-                  <span>1 Активных</span>
-                  <ChevronIcon />
-                </div>
-              </button>
-            ) : null}
           </div>
+
+          <button
+            type="button"
+            onClick={() => navigate(`/edit/${id}/reminders`)}
+            className="rounded-lg border border-border bg-card px-3 py-2.5 text-left"
+          >
+            <div className="text-[11px] text-muted-foreground">Напоминание</div>
+            <div className="mt-0.5 flex items-center justify-between text-[13px] text-foreground">
+              <span>1 Активных</span>
+              <ChevronIcon />
+            </div>
+          </button>
+
           <Card className="border shadow-none">
             <CardContent className="px-3 py-3">
               <div className="mb-2.5 text-sm text-foreground">
                 Как отслеживать выполнения?
               </div>
               <div className="grid grid-cols-2 gap-1.5">
-                {["Пошагово", "Своё значение"].map((label) => (
-                  <div
-                    key={label}
-                    className={cn(
-                      "cursor-pointer rounded-md border border-border py-2 text-center text-sm",
-                      label === "Пошагово" && "bg-muted",
-                    )}
-                  >
-                    {label}
-                  </div>
-                ))}
+                <button
+                  type="button"
+                  onClick={() => setTrackingMode("step")}
+                  className={cn(
+                    "cursor-pointer rounded-md border border-border py-2 text-center text-sm transition-colors",
+                    trackingMode !== "custom" && "bg-muted",
+                  )}
+                >
+                  Пошагово
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTrackingMode("custom")}
+                  className={cn(
+                    "cursor-pointer rounded-md border border-border py-2 text-center text-sm transition-colors",
+                    trackingMode === "custom" && "bg-muted",
+                  )}
+                >
+                  Своё значение
+                </button>
               </div>
               <p className="mt-1.5 text-center text-xs text-muted-foreground">
-                Увеличивать на 1 с каждым выполнением
+                {trackingMode === "custom"
+                  ? "При отметке дня вводите своё число (страницы, шаги и т. д.)"
+                  : "Увеличивать на 1 с каждым выполнением"}
               </p>
+              {trackingMode === "custom" ? (
+                <div className="mt-3">
+                  <Label
+                    htmlFor="habit-daily-goal"
+                    className="text-muted-foreground"
+                  >
+                    Цель на день (для шкалы прогресса)
+                  </Label>
+                  <Input
+                    id="habit-daily-goal"
+                    inputMode="numeric"
+                    placeholder="Например, 8"
+                    value={dailyGoalInput}
+                    onChange={(e) => setDailyGoalInput(e.target.value)}
+                    className="mt-1.5 h-11 rounded-lg text-[15px]"
+                  />
+                </div>
+              ) : null}
             </CardContent>
           </Card>
         </div>

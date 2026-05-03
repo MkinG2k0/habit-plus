@@ -1,4 +1,4 @@
-import type { Habit } from "@/entities/habit";
+import { completionDayFilled, type Habit } from "@/entities/habit";
 import type { DayInfo } from "@/shared/lib/habitDates";
 import { Card } from "@/shared/ui/shadCNComponents/ui/card";
 import { HabitIcon } from "@/shared/ui/habitIcon/HabitIcon";
@@ -47,7 +47,7 @@ export const HabitListRow = ({
         onKeyDown={(e) => e.stopPropagation()}
       >
         {days.map((day) => {
-          const filled = habit.completions[day.key] ?? false;
+          const filled = completionDayFilled(habit.completions[day.key]);
           return (
             <button
               key={day.key}

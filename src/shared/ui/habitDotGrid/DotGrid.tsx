@@ -1,4 +1,5 @@
 import { useLayoutEffect, useMemo, useRef } from "react";
+import { completionDayFilled } from "@/entities/habit";
 import {
   buildUtcWeekColumns,
   getHabitHeatmapUtcRange,
@@ -7,7 +8,7 @@ import {
 import { cn } from "@/shared/ui/lib/utils";
 
 interface DotGridProps {
-  completions: Record<string, boolean>;
+  completions: Record<string, boolean | number>;
   color: string;
   dotSize?: number;
   gap?: number;
@@ -32,7 +33,7 @@ export const DotGrid = ({
         const key = getIsoDayKeyUtc(d);
         const t = d.getTime();
         const inRange = t >= rsTime && t <= edTime;
-        const done = inRange && (completions[key] ?? false);
+        const done = inRange && completionDayFilled(completions[key]);
         return { key, inRange, done };
       }),
     );

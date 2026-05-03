@@ -6,6 +6,11 @@ export type {
   Reminder,
   ViewMode,
 } from "./model/types";
+export type { HabitCompletionValue } from "./model/habitCompletion";
+export {
+  completionDayFilled,
+  getCompletionNumericValue,
+} from "./model/habitCompletion";
 export type {
   AppCategoryCatalogEntry,
   AppCategoryCatalogKind,

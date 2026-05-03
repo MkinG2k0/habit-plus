@@ -1,3 +1,4 @@
+import { completionDayFilled } from "@/entities/habit/model/habitCompletion";
 import { useMemo } from "react";
 
 const DAY_NAMES_RU = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
@@ -84,7 +85,9 @@ const YEAR_WINDOW_DAYS = 365;
  * если первая отметка старше этого окна — от первой отметки до сегодня.
  * Сетка выравнивается по понедельнику (UTC, как ключи в сторе).
  */
-export function getHabitHeatmapUtcRange(completions: Record<string, boolean>): {
+export function getHabitHeatmapUtcRange(
+  completions: Record<string, boolean | number>,
+): {
   gridStartMonday: Date;
   rangeStart: Date;
   endDate: Date;
@@ -95,7 +98,9 @@ export function getHabitHeatmapUtcRange(completions: Record<string, boolean>): {
   const oneYearAgo = addUtcDays(endDate, -YEAR_WINDOW_DAYS);
   const oneYearAgoKey = getIsoDayKeyUtc(oneYearAgo);
 
-  const doneKeys = Object.keys(completions).filter((k) => completions[k]);
+  const doneKeys = Object.keys(completions).filter((k) =>
+    completionDayFilled(completions[k]),
+  );
   doneKeys.sort();
   const firstKey = doneKeys[0];
 

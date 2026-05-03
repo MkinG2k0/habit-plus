@@ -1,12 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useHabitStore } from "@/entities/habit";
+import {
+  completionDayFilled,
+  useHabitStore,
+  type Habit,
+} from "@/entities/habit";
 import {
   buildHomeCategoryFilterChips,
   categoryFiltersEqual,
   habitMatchesCategoryFilter,
   type HabitCategoryFilter,
 } from "@/features/habitCategories";
+import { HabitCustomValueDrawer } from "@/features/habitCustomValue";
 import { HabitDetailDrawer } from "@/features/habitDetail";
 import { useLastNDays, useTodayKey } from "@/shared/lib/habitDates";
 import { Badge } from "@/shared/ui/shadCNComponents/ui/badge";
@@ -29,6 +34,10 @@ export const HomePage = () => {
   const [categoryFilter, setCategoryFilter] = useState<HabitCategoryFilter>(null);
   const [detailId, setDetailId] = useState<number | null>(null);
   const [isDetailDrawerOpen, setIsDetailDrawerOpen] = useState(false);
+  const [customValueTarget, setCustomValueTarget] = useState<{
+    habitId: number;
+    dateKey: string;
+  } | null>(null);
   const detailCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
@@ -51,6 +60,29 @@ export const HomePage = () => {
   );
 
   const detailHabit = habits.find((h) => h.id === detailId) ?? null;
+
+  const customValueHabit = useMemo(() => {
+    if (!customValueTarget) return null;
+    return habits.find((h) => h.id === customValueTarget.habitId) ?? null;
+  }, [habits, customValueTarget]);
+
+  useEffect(() => {
+    if (customValueTarget && !customValueHabit) {
+      setCustomValueTarget(null);
+    }
+  }, [customValueTarget, customValueHabit]);
+
+  const handleToggleHabitDay = useCallback(
+    (habit: Habit, dateKey: string) => {
+      if (habit.trackingMode === "custom") {
+        setIsDetailDrawerOpen(false);
+        setCustomValueTarget({ habitId: habit.id, dateKey });
+        return;
+      }
+      toggleDateCompletion(habit.id, dateKey);
+    },
+    [toggleDateCompletion],
+  );
 
   const openDetail = useCallback((id: number) => {
     if (detailCloseTimerRef.current) {
@@ -144,8 +176,17 @@ export const HomePage = () => {
                 <HabitCard
                   key={h.id}
                   habit={h}
-                  isDoneToday={h.completions[today] ?? false}
-                  onToggle={() => toggleToday(h.id)}
+                  isDoneToday={completionDayFilled(h.completions[today])}
+                  onToggle={() => {
+                    if (h.trackingMode === "custom") {
+                      setCustomValueTarget({
+                        habitId: h.id,
+                        dateKey: today,
+                      });
+                      return;
+                    }
+                    toggleToday(h.id);
+                  }}
                   onOpen={() => openDetail(h.id)}
                 />
               ))}
@@ -157,7 +198,16 @@ export const HomePage = () => {
                   key={h.id}
                   habit={h}
                   days={last5}
-                  onToggleDay={(dateKey) => toggleDateCompletion(h.id, dateKey)}
+                  onToggleDay={(dateKey) => {
+                    if (h.trackingMode === "custom") {
+                      setCustomValueTarget({
+                        habitId: h.id,
+                        dateKey,
+                      });
+                      return;
+                    }
+                    toggleDateCompletion(h.id, dateKey);
+                  }}
                   onOpen={() => openDetail(h.id)}
                 />
               ))}
@@ -187,6 +237,7 @@ export const HomePage = () => {
           if (open) setIsDetailDrawerOpen(true);
           else closeDetail();
         }}
+        onToggleHabitDay={handleToggleHabitDay}
         onEdit={(h) => {
           setIsDetailDrawerOpen(false);
           if (detailCloseTimerRef.current) {
@@ -208,6 +259,15 @@ export const HomePage = () => {
             detailCloseTimerRef.current = null;
             navigate(`/edit/${h.id}/reminders`);
           }, 280);
+        }}
+      />
+
+      <HabitCustomValueDrawer
+        habit={customValueHabit}
+        dateKey={customValueTarget?.dateKey ?? ""}
+        open={Boolean(customValueTarget && customValueHabit)}
+        onOpenChange={(open) => {
+          if (!open) setCustomValueTarget(null);
         }}
       />
     </>

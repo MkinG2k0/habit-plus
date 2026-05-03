@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { zustandAppStorage } from "@/shared/lib/storageAdapter";
+import { completionDayFilled } from "../model/habitCompletion";
 import type { Habit, ViewMode } from "../model/types";
 
 interface HabitState {
@@ -8,6 +9,11 @@ interface HabitState {
   viewMode: ViewMode;
   toggleToday: (id: number) => void;
   toggleDateCompletion: (id: number, dateKey: string) => void;
+  setHabitDayCompletionValue: (
+    id: number,
+    dateKey: string,
+    value: number,
+  ) => void;
   addHabit: (data: Omit<Habit, "id" | "completions">) => void;
   updateHabit: (id: number, data: Partial<Omit<Habit, "id">>) => void;
   deleteHabit: (id: number) => void;
@@ -24,9 +30,16 @@ export const useHabitStore = create<HabitState>()(
         set((state) => ({
           habits: state.habits.map((h) => {
             if (h.id !== id) return h;
+            if (h.trackingMode === "custom") return h;
             const today = new Date().toISOString().slice(0, 10);
-            const done = !h.completions[today];
-            return { ...h, completions: { ...h.completions, [today]: done } };
+            const filled = completionDayFilled(h.completions[today]);
+            return {
+              ...h,
+              completions: {
+                ...h.completions,
+                [today]: !filled,
+              },
+            };
           }),
         })),
 
@@ -34,11 +47,26 @@ export const useHabitStore = create<HabitState>()(
         set((state) => ({
           habits: state.habits.map((h) => {
             if (h.id !== id) return h;
-            const done = !(h.completions[dateKey] ?? false);
+            if (h.trackingMode === "custom") return h;
+            const filled = completionDayFilled(h.completions[dateKey]);
             return {
               ...h,
-              completions: { ...h.completions, [dateKey]: done },
+              completions: { ...h.completions, [dateKey]: !filled },
             };
+          }),
+        })),
+
+      setHabitDayCompletionValue: (id, dateKey, value) =>
+        set((state) => ({
+          habits: state.habits.map((h) => {
+            if (h.id !== id) return h;
+            const next = { ...h.completions };
+            if (value <= 0) {
+              delete next[dateKey];
+            } else {
+              next[dateKey] = value;
+            }
+            return { ...h, completions: next };
           }),
         })),
 

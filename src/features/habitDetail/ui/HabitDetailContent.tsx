@@ -6,8 +6,11 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { Habit } from "@/entities/habit";
-import { useHabitStore } from "@/entities/habit";
+import {
+  completionDayFilled,
+  getCompletionNumericValue,
+  type Habit,
+} from "@/entities/habit";
 import { DotGrid } from "@/shared/ui/habitDotGrid/DotGrid";
 import { HabitIcon } from "@/shared/ui/habitIcon/HabitIcon";
 import { Button } from "@/shared/ui/shadCNComponents/ui/button";
@@ -38,6 +41,7 @@ interface HabitDetailContentProps {
   onClose: () => void;
   onEdit: () => void;
   onOpenReminders?: () => void;
+  onToggleDay: (dateKey: string) => void;
 }
 
 function startOfMonth(d: Date): Date {
@@ -89,8 +93,8 @@ export const HabitDetailContent = ({
   onClose,
   onEdit,
   onOpenReminders,
+  onToggleDay,
 }: HabitDetailContentProps) => {
-  const toggleDateCompletion = useHabitStore((s) => s.toggleDateCompletion);
   const [centerMonth, setCenterMonth] = useState(() =>
     startOfMonth(new Date()),
   );
@@ -280,9 +284,7 @@ export const HabitDetailContent = ({
                 habit={habit}
                 year={y}
                 month={m}
-                onToggleDay={(dateStr) =>
-                  toggleDateCompletion(habit.id, dateStr)
-                }
+                onToggleDay={onToggleDay}
               />
             </SwiperSlide>
           );
@@ -346,7 +348,14 @@ function MonthDayGrid({
     <div className="grid grid-cols-7 grid-rows-6 gap-1">
       {cells.map(({ date, inCurrentMonth }) => {
         const dateStr = formatLocalDateStr(date);
-        const done = habit.completions[dateStr] ?? false;
+        const raw = habit.completions[dateStr];
+        const done = completionDayFilled(raw);
+        const amount =
+          habit.trackingMode === "custom"
+            ? getCompletionNumericValue(raw)
+            : 0;
+        const showAmountBadge =
+          habit.trackingMode === "custom" && amount > 0;
         const isToday =
           date.getDate() === today.getDate() &&
           date.getMonth() === today.getMonth() &&
@@ -376,12 +385,21 @@ function MonthDayGrid({
             }
             aria-label={
               done
-                ? `Снять отметку ${dateStr}`
+                ? amount > 0
+                  ? `Изменить значение ${amount} за ${dateStr}`
+                  : `Снять отметку ${dateStr}`
                 : `Отметить выполнение ${dateStr}`
             }
             aria-pressed={done}
           >
-            {date.getDate()}
+            <span className="flex flex-col items-center leading-none">
+              <span>{date.getDate()}</span>
+              {showAmountBadge ? (
+                <span className="mt-0.5 text-[10px] font-semibold opacity-90">
+                  {amount}
+                </span>
+              ) : null}
+            </span>
           </button>
         );
       })}

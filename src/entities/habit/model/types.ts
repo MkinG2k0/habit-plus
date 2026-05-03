@@ -1,4 +1,5 @@
 import type { HabitPresetCategoryId } from "./habitPresetCategories";
+import type { HabitCompletionValue } from "./habitCompletion";
 
 /** Встроенные SVG-значки (до Lucide); сохраняются в данных как строка. */
 export type HabitIconName =
@@ -34,7 +35,7 @@ export interface Habit {
   desc: string;
   icon: HabitIconId;
   color: string;
-  completions: Record<string, boolean>;
+  completions: Record<string, HabitCompletionValue>;
   streakGoal?: number;
   reminders?: Reminder[];
   /** @deprecated используйте categoryTags */

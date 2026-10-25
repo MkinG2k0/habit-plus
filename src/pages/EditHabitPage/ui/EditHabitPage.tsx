@@ -8,11 +8,13 @@ import {
   type HabitCategoryTag,
   type HabitIconId,
   type HabitStreakInterval,
+  type HabitTemplate,
 } from "@/entities/habit";
 import { HabitCategoriesField } from "@/features/habitCategories";
 import { formatRemindersSummary } from "@/features/habitReminders";
 import { HabitStreakGoalField } from "@/features/habitStreakGoal";
 import { HabitIconPickerDrawer } from "@/features/habitIconPicker";
+import { HabitTemplatePicker } from "@/features/habitTemplates";
 import { Button } from "@/shared/ui/shadCNComponents/ui/button";
 import { Card, CardContent } from "@/shared/ui/shadCNComponents/ui/card";
 import { Input } from "@/shared/ui/shadCNComponents/ui/input";
@@ -34,6 +36,7 @@ export const EditHabitPage = () => {
   const [color, setColor] = useState(existing?.color ?? DEFAULT_HABIT_COLOR);
   const [icon, setIcon] = useState<HabitIconId>(existing?.icon ?? "health");
   const [iconPickerOpen, setIconPickerOpen] = useState(false);
+  const [templatePickerOpen, setTemplatePickerOpen] = useState(false);
   const [categoryTags, setCategoryTags] = useState<HabitCategoryTag[]>(
     existing?.categoryTags ?? [],
   );
@@ -61,6 +64,12 @@ export const EditHabitPage = () => {
   const accentLabelColor = useMemo(() => foregroundOnHabitColor(color), [color]);
 
   const canSave = name.trim().length > 0;
+
+  const handleTemplateSelect = (template: HabitTemplate) => {
+    setName(template.name);
+    setDesc(template.desc);
+    setCategoryTags([{ type: "preset", id: template.categoryId }]);
+  };
 
   const handleSave = () => {
     if (!canSave) return;
@@ -152,6 +161,30 @@ export const EditHabitPage = () => {
         />
 
         <div className="space-y-3.5">
+          {isNew ? (
+            <>
+              <button
+                type="button"
+                onClick={() => setTemplatePickerOpen(true)}
+                className={cn(
+                  "w-full rounded-lg border border-dashed border-border bg-card px-3 py-2.5 text-left transition-colors",
+                  "hover:border-primary/50 hover:bg-muted/40 active:bg-muted/60",
+                )}
+              >
+                <div className="text-[11px] text-muted-foreground">
+                  Быстрый старт
+                </div>
+                <div className="mt-0.5 text-[13px] font-medium text-foreground">
+                  Из шаблонов
+                </div>
+              </button>
+              <HabitTemplatePicker
+                open={templatePickerOpen}
+                onOpenChange={setTemplatePickerOpen}
+                onSelect={handleTemplateSelect}
+              />
+            </>
+          ) : null}
           <div>
             <Label htmlFor="habit-name" className="text-muted-foreground">
               Имя

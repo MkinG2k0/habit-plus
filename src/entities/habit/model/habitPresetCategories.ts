@@ -1,5 +1,11 @@
 export const HABIT_PRESET_CATEGORY_IDS = [
+  "family",
   "health",
+  "selfDevelopment",
+  "career",
+  "spirituality",
+  "socialCircle",
+  "leisure",
   "art",
   "communication",
   "nutrition",
@@ -17,7 +23,13 @@ export type HabitPresetCategoryId = (typeof HABIT_PRESET_CATEGORY_IDS)[number];
 
 export const HABIT_PRESET_CATEGORY_LABELS: Record<HabitPresetCategoryId, string> =
   {
+    family: "Семья",
     health: "Здоровье",
+    selfDevelopment: "Саморазвитие",
+    career: "Карьера",
+    spirituality: "Духовность",
+    socialCircle: "Окружение",
+    leisure: "Отдых",
     art: "Искусство",
     communication: "Общение",
     nutrition: "Питание",

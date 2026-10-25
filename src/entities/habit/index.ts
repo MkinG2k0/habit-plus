@@ -26,6 +26,15 @@ export {
   HABIT_PRESET_CATEGORY_IDS,
   HABIT_PRESET_CATEGORY_LABELS,
 } from "./model/habitPresetCategories";
+export type {
+  HabitTemplate,
+  HabitTemplateCategoryId,
+} from "./model/habitTemplates";
+export {
+  HABIT_TEMPLATES,
+  HABIT_TEMPLATE_CATEGORY_IDS,
+  getHabitTemplatesByCategory,
+} from "./model/habitTemplates";
 export {
   DEFAULT_HABIT_COLOR,
   foregroundOnHabitColor,

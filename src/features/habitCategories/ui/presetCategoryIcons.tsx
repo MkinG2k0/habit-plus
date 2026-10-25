@@ -2,21 +2,33 @@ import type { HabitPresetCategoryId } from "@/entities/habit";
 import type { LucideIcon } from "lucide-react";
 import {
   Bike,
+  BookHeart,
   Briefcase,
   CloudSun,
   Diamond,
   GraduationCap,
   Heart,
+  Home,
   Moon,
   Palette,
+  Palmtree,
+  Rocket,
+  Sparkles,
   Sun,
   Users,
+  UsersRound,
   UtensilsCrossed,
   Wallet,
 } from "lucide-react";
 
 const PRESET_ICONS: Record<HabitPresetCategoryId, LucideIcon> = {
+  family: Home,
   health: Heart,
+  selfDevelopment: Sparkles,
+  career: Rocket,
+  spirituality: BookHeart,
+  socialCircle: UsersRound,
+  leisure: Palmtree,
   art: Palette,
   communication: Users,
   nutrition: UtensilsCrossed,

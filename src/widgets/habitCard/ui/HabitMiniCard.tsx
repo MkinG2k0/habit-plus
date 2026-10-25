@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/shared/ui/shadCNComponents/ui/card";
 import { HabitIcon } from "@/shared/ui/habitIcon/HabitIcon";
 import { cn } from "@/shared/ui/lib/utils";
 import { formatMonthYearRu } from "@/shared/lib/habitDates";
+import { HabitStreakBadge } from "./HabitStreakBadge";
 
 interface HabitMiniCardProps {
   habit: Habit;
@@ -34,12 +35,13 @@ export const HabitMiniCard = ({ habit, onOpen }: HabitMiniCardProps) => {
           >
             <HabitIcon name={habit.icon} color="#fff" size={14} />
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <div className="truncate text-[13px] font-semibold leading-[18px] text-foreground">
               {habit.name}
             </div>
-            <div className="text-[11px] text-muted-foreground">
-              {monthLabel}
+            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <span className="truncate">{monthLabel}</span>
+              <HabitStreakBadge habit={habit} size="sm" />
             </div>
           </div>
         </div>

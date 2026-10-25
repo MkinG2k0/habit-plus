@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { Badge } from "@/shared/ui/shadCNComponents/ui/badge";
 import { Button } from "@/shared/ui/shadCNComponents/ui/button";
 
 export const HabitTopBar = () => {
@@ -22,12 +21,6 @@ export const HabitTopBar = () => {
         <span className="text-xl font-bold text-chart-1">+</span>
       </div>
       <div className="flex items-center gap-1">
-        <Badge
-          variant="secondary"
-          className="h-5 border-0 px-1.5 text-[11px] font-bold text-muted-foreground"
-        >
-          PRO
-        </Badge>
         <Button
           type="button"
           variant="ghost"

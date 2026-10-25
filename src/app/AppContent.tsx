@@ -1,8 +1,11 @@
 import { Suspense } from "react";
+import { useHabitReminderScheduler } from "@/features/habitReminders";
 import { AppRoutes } from "./router/routes.tsx";
 import { AppLayout } from "./layout/AppLayout.tsx";
 
 export const AppContent = () => {
+  useHabitReminderScheduler();
+
   return (
     <AppLayout>
       <Suspense

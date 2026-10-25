@@ -10,6 +10,7 @@ import {
   type HabitStreakInterval,
 } from "@/entities/habit";
 import { HabitCategoriesField } from "@/features/habitCategories";
+import { formatRemindersSummary } from "@/features/habitReminders";
 import { HabitStreakGoalField } from "@/features/habitStreakGoal";
 import { HabitIconPickerDrawer } from "@/features/habitIconPicker";
 import { Button } from "@/shared/ui/shadCNComponents/ui/button";
@@ -223,17 +224,23 @@ export const EditHabitPage = () => {
             />
           </div>
 
-          <button
-            type="button"
-            onClick={() => navigate(`/edit/${id}/reminders`)}
-            className="rounded-lg border border-border bg-card px-3 py-2.5 text-left"
-          >
-            <div className="text-[11px] text-muted-foreground">Напоминание</div>
-            <div className="mt-0.5 flex items-center justify-between text-[13px] text-foreground">
-              <span>1 Активных</span>
-              <ChevronIcon />
-            </div>
-          </button>
+          {!isNew ? (
+            <button
+              type="button"
+              onClick={() => navigate(`/edit/${id}/reminders`)}
+              className="rounded-lg border border-border bg-card px-3 py-2.5 text-left"
+            >
+              <div className="text-[11px] text-muted-foreground">
+                Напоминание
+              </div>
+              <div className="mt-0.5 flex items-center justify-between text-[13px] text-foreground">
+                <span>
+                  {formatRemindersSummary(existing?.reminders)}
+                </span>
+                <ChevronIcon />
+              </div>
+            </button>
+          ) : null}
 
           <Card className="border shadow-none">
             <CardContent className="px-3 py-3">

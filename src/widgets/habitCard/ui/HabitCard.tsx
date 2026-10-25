@@ -3,6 +3,7 @@ import { DotGrid } from "@/shared/ui/habitDotGrid/DotGrid";
 import { Card, CardContent } from "@/shared/ui/shadCNComponents/ui/card";
 import { HabitIcon } from "@/shared/ui/habitIcon/HabitIcon";
 import { cn } from "@/shared/ui/lib/utils";
+import { HabitStreakBadge } from "./HabitStreakBadge";
 
 interface HabitCardProps {
   habit: Habit;
@@ -41,8 +42,11 @@ export const HabitCard = ({
             <HabitIcon name={habit.icon} color={habit.color} size={18} />
           </div>
           <div className="min-w-0 flex-1">
-            <div className="truncate text-base font-semibold text-foreground">
-              {habit.name}
+            <div className="flex items-center gap-2">
+              <div className="min-w-0 truncate text-base font-semibold text-foreground">
+                {habit.name}
+              </div>
+              <HabitStreakBadge habit={habit} />
             </div>
             {habit.desc ? (
               <div className="mt-0.5 truncate text-xs text-muted-foreground">

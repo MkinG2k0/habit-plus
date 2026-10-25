@@ -3,6 +3,7 @@ import type { DayInfo } from "@/shared/lib/habitDates";
 import { Card } from "@/shared/ui/shadCNComponents/ui/card";
 import { HabitIcon } from "@/shared/ui/habitIcon/HabitIcon";
 import { cn } from "@/shared/ui/lib/utils";
+import { HabitStreakBadge } from "./HabitStreakBadge";
 
 interface HabitListRowProps {
   habit: Habit;
@@ -38,8 +39,11 @@ export const HabitListRow = ({
       >
         <HabitIcon name={habit.icon} color={habit.color} size={16} />
       </div>
-      <div className="min-w-0 flex-1 truncate text-[15px] font-medium text-foreground">
-        {habit.name}
+      <div className="flex min-w-0 flex-1 items-center gap-1.5">
+        <div className="min-w-0 truncate text-[15px] font-medium text-foreground">
+          {habit.name}
+        </div>
+        <HabitStreakBadge habit={habit} size="sm" />
       </div>
       <div
         className="flex gap-1.5"

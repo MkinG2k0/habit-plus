@@ -15,6 +15,9 @@ const HabitRemindersPage = lazy(() =>
 const SettingsPage = lazy(() =>
   import("@/pages/SettingsPage").then((m) => ({ default: m.SettingsPage })),
 );
+const DataBackupPage = lazy(() =>
+  import("@/pages/DataBackupPage").then((m) => ({ default: m.DataBackupPage })),
+);
 
 export const AppRoutes = () => {
   return (
@@ -56,6 +59,14 @@ export const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <SettingsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settings/backup"
+        element={
+          <ProtectedRoute>
+            <DataBackupPage />
           </ProtectedRoute>
         }
       />

@@ -6,6 +6,7 @@ interface SettingsItem {
   icon: string;
   label: string;
   iconClass: string;
+  to?: string;
 }
 
 interface SettingsSection {
@@ -37,7 +38,12 @@ export const SettingsPage = () => {
         },
         { icon: "🎨", label: "Тема", iconClass: ICON_BOX[2] },
         { icon: "📦", label: "Архив привычек", iconClass: ICON_BOX[3] },
-        { icon: "📤", label: "Импорт/Экспорт данных", iconClass: ICON_BOX[4] },
+        {
+          icon: "📤",
+          label: "Импорт/Экспорт данных",
+          iconClass: ICON_BOX[4],
+          to: "/settings/backup",
+        },
         { icon: "📋", label: "Отсортировать привычки", iconClass: ICON_BOX[5] },
       ],
     },
@@ -115,6 +121,9 @@ export const SettingsPage = () => {
                     <button
                       type="button"
                       className="flex w-full items-center gap-3 px-3.5 py-3 text-left"
+                      onClick={() => {
+                        if (item.to) navigate(item.to);
+                      }}
                     >
                       <div
                         className={cn(

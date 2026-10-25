@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="habit+ E">
+  <rect width="512" height="512" fill="#0d0d0d" rx="112" />
+  <!-- :0@B>G:0 ?@82KG:8 -->
+  <rect x="118" y="118" width="276" height="276" rx="56" fill="none" stroke="#f58220" stroke-width="28" />
+  <path
+    d="M188 268l52 52 112-120"
+    fill="none"
+    stroke="#f58220"
+    stroke-width="40"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>

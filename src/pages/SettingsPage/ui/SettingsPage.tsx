@@ -48,25 +48,6 @@ export const SettingsPage = () => {
         { icon: "📋", label: "Отсортировать привычки", iconClass: ICON_BOX[5] },
       ],
     },
-    {
-      title: "Помощь",
-      items: [
-        { icon: "🚀", label: "Show Onboarding", iconClass: ICON_BOX[0] },
-        { icon: "📰", label: "Show What's New", iconClass: ICON_BOX[1] },
-        { icon: "✉️", label: "Обратная связь", iconClass: ICON_BOX[2] },
-      ],
-    },
-    {
-      title: "Информация о приложении",
-      items: [
-        { icon: "🌐", label: "Сайт", iconClass: ICON_BOX[3] },
-        {
-          icon: "🔒",
-          label: "Политика конфиденциальности",
-          iconClass: ICON_BOX[4],
-        },
-      ],
-    },
   ];
 
   return (
@@ -85,31 +66,6 @@ export const SettingsPage = () => {
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3.5">
-        <button
-          type="button"
-          className="mb-5 flex w-full items-center gap-3 rounded-lg border border-border bg-card p-3.5 text-left"
-        >
-          <div
-            className="grid size-11 shrink-0 grid-cols-2 gap-0.5 rounded-lg bg-gradient-to-br from-chart-2 via-chart-4 to-chart-1 p-1.5"
-            aria-hidden
-          >
-            <div className="rounded-sm bg-primary-foreground/35" />
-            <div className="rounded-sm bg-primary-foreground/35" />
-            <div className="rounded-sm bg-primary-foreground/35" />
-            <div className="rounded-sm bg-primary-foreground/35" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="text-sm font-semibold text-foreground">
-              Подписаны на{" "}
-              <span className="text-chart-1">habit+ Pro</span>
-            </div>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              Безлимитные привычки, импорт/экспо...
-            </p>
-          </div>
-          <ChevronIcon />
-        </button>
-
         <PwaSettingsCard iconClass={ICON_BOX[0]} />
 
         {sections.map((sec) => (
@@ -119,30 +75,47 @@ export const SettingsPage = () => {
             </div>
             <Card className="overflow-hidden border shadow-none">
               <ul className="divide-y divide-border">
-                {sec.items.map((item) => (
-                  <li key={item.label}>
-                    <button
-                      type="button"
-                      className="flex w-full items-center gap-3 px-3.5 py-3 text-left"
-                      onClick={() => {
-                        if (item.to) navigate(item.to);
-                      }}
-                    >
-                      <div
+                {sec.items.map((item) => {
+                  const isEnabled = Boolean(item.to);
+
+                  return (
+                    <li key={item.label}>
+                      <button
+                        type="button"
+                        disabled={!isEnabled}
+                        aria-disabled={!isEnabled}
                         className={cn(
-                          "flex size-8 shrink-0 items-center justify-center rounded-lg text-base",
-                          item.iconClass,
+                          "flex w-full items-center gap-3 px-3.5 py-3 text-left",
+                          !isEnabled && "cursor-not-allowed",
                         )}
+                        onClick={() => {
+                          if (item.to) navigate(item.to);
+                        }}
                       >
-                        {item.icon}
-                      </div>
-                      <span className="flex-1 text-[15px] text-foreground">
-                        {item.label}
-                      </span>
-                      <ChevronIcon />
-                    </button>
-                  </li>
-                ))}
+                        <div
+                          className={cn(
+                            "flex size-8 shrink-0 items-center justify-center rounded-lg text-base",
+                            isEnabled ? item.iconClass : "bg-muted",
+                            !isEnabled && "opacity-50 grayscale",
+                          )}
+                        >
+                          {item.icon}
+                        </div>
+                        <span
+                          className={cn(
+                            "flex-1 text-[15px]",
+                            isEnabled
+                              ? "text-foreground"
+                              : "text-muted-foreground",
+                          )}
+                        >
+                          {item.label}
+                        </span>
+                        <ChevronIcon muted={!isEnabled} />
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             </Card>
           </div>
@@ -169,7 +142,7 @@ function CloseIcon() {
   );
 }
 
-function ChevronIcon() {
+function ChevronIcon({ muted = false }: { muted?: boolean }) {
   return (
     <svg
       width={16}
@@ -180,7 +153,10 @@ function ChevronIcon() {
       strokeWidth="2.5"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="shrink-0 text-muted-foreground"
+      className={cn(
+        "shrink-0",
+        muted ? "text-muted-foreground/40" : "text-muted-foreground",
+      )}
     >
       <polyline points="9 18 15 12 9 6" />
     </svg>

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="habit+ C">
+  <rect width="512" height="512" fill="#0d0d0d" rx="112" />
+  <!-- h: левая ножка + чаша -->
+  <path
+    d="M118 128v256"
+    fill="none"
+    stroke="#f58220"
+    stroke-width="48"
+    stroke-linecap="round"
+  />
+  <path
+    d="M118 272c0-64 48-104 104-104s104 40 104 104v116"
+    fill="none"
+    stroke="#f58220"
+    stroke-width="48"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <!-- + -->
+  <path
+    d="M392 188v136M324 256h136"
+    fill="none"
+    stroke="#f58220"
+    stroke-width="44"
+    stroke-linecap="round"
+  />
+</svg>

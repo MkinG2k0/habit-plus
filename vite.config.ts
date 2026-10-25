@@ -20,9 +20,12 @@ export default defineConfig({
       includeAssets: [
         "logo.svg",
         "logo.png",
+        "og-image.png",
         "pwa-192x192.png",
         "pwa-512x512.png",
         "pwa-512x512-maskable.png",
+        "screenshots/*.png",
+        "splash/*.png",
       ],
       manifest: pwaManifest,
       srcDir: "src/app/providers/pwa",

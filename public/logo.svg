@@ -1,19 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="habit">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="habit+">
   <rect width="512" height="512" fill="#0d0d0d" rx="112" />
-  <!-- Неделя привычек + отметка «выполнено» -->
-  <rect x="98" y="292" width="32" height="88" fill="#f58220" rx="10" />
-  <rect x="144" y="268" width="32" height="112" fill="#f58220" rx="10" />
-  <rect x="190" y="244" width="32" height="136" fill="#f58220" rx="10" />
-  <rect x="236" y="256" width="32" height="124" fill="#f58220" rx="10" />
-  <rect x="282" y="228" width="32" height="152" fill="#f58220" rx="10" />
-  <rect x="328" y="276" width="32" height="104" fill="#f58220" rx="10" />
-  <rect x="374" y="248" width="32" height="132" fill="#f58220" rx="10" />
+  <circle cx="256" cy="256" r="148" fill="none" stroke="#2a2a2a" stroke-width="36" />
   <path
-    d="M118 176l48 48 88-88"
+    d="M256 108a148 148 0 1 1-104.7 253.7"
     fill="none"
     stroke="#f58220"
     stroke-width="36"
     stroke-linecap="round"
-    stroke-linejoin="round"
   />
+  <path d="M256 176v160M176 256h160" fill="none" stroke="#f58220" stroke-width="44" stroke-linecap="round" />
 </svg>

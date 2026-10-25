@@ -15,6 +15,29 @@ export const pwaManifest: Partial<ManifestOptions> = {
   scope: "/",
   start_url: "/",
   categories: ["lifestyle", "health", "productivity"],
+  screenshots: [
+    {
+      src: "/screenshots/narrow-home.png",
+      sizes: "540x720",
+      type: "image/png",
+      form_factor: "narrow",
+      label: "Список привычек на сегодня",
+    },
+    {
+      src: "/screenshots/narrow-settings.png",
+      sizes: "540x720",
+      type: "image/png",
+      form_factor: "narrow",
+      label: "Настройки и установка",
+    },
+    {
+      src: "/screenshots/wide-home.png",
+      sizes: "1280x720",
+      type: "image/png",
+      form_factor: "wide",
+      label: "habit+ на большом экране",
+    },
+  ],
   icons: [
     {
       src: "/pwa-192x192.png",

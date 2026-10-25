@@ -16,9 +16,19 @@ export const HabitTopBar = () => {
       >
         <SettingsIcon />
       </Button>
-      <div className="flex flex-1 justify-center text-center">
-        <span className="text-xl font-bold text-foreground">habit</span>
-        <span className="text-xl font-bold text-chart-1">+</span>
+      <div className="flex flex-1 items-center justify-center gap-2">
+        <img
+          src="/logo.svg"
+          alt=""
+          width={28}
+          height={28}
+          className="size-7 shrink-0 rounded-md"
+          aria-hidden
+        />
+        <div className="flex text-center">
+          <span className="text-xl font-bold text-foreground">habit</span>
+          <span className="text-xl font-bold text-chart-1">+</span>
+        </div>
       </div>
       <div className="flex items-center gap-1">
         <Button

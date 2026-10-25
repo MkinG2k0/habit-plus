@@ -3,6 +3,7 @@ export type {
   HabitCategoryTag,
   HabitIconId,
   HabitIconName,
+  HabitStreakInterval,
   Reminder,
   ViewMode,
 } from "./model/types";
@@ -30,5 +31,9 @@ export {
   foregroundOnHabitColor,
   HABIT_COLOR_OPTIONS,
 } from "./model/habitColors";
+export {
+  computeHabitStreak,
+  formatLocalDateKey,
+} from "./lib/computeHabitStreak";
 export { useHabitStore } from "./slice/habitStore";
 export { useHabitCategoryCatalogStore } from "./slice/habitCategoryCatalogStore";

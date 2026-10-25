@@ -29,6 +29,9 @@ export interface Reminder {
   time: string;
 }
 
+/** Интервал цели серии: как часто нужно отмечать, чтобы не прервать серию. */
+export type HabitStreakInterval = "none" | "daily" | "weekly" | "monthly";
+
 export interface Habit {
   id: number;
   name: string;
@@ -36,6 +39,11 @@ export interface Habit {
   icon: HabitIconId;
   color: string;
   completions: Record<string, HabitCompletionValue>;
+  /** Интервал подсчёта серии (ежедневно / раз в неделю / раз в месяц). */
+  streakInterval?: HabitStreakInterval;
+  /**
+   * @deprecated Раньше — цель «N дней подряд». Заменено на `streakInterval`; в данных может остаться из старых версий.
+   */
   streakGoal?: number;
   reminders?: Reminder[];
   /** @deprecated используйте categoryTags */

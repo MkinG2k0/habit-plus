@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { zustandAppStorage } from "@/shared/lib/storageAdapter";
+import { formatLocalDateKey } from "../lib/computeHabitStreak";
 import { completionDayFilled } from "../model/habitCompletion";
 import type { Habit, ViewMode } from "../model/types";
 
@@ -31,7 +32,7 @@ export const useHabitStore = create<HabitState>()(
           habits: state.habits.map((h) => {
             if (h.id !== id) return h;
             if (h.trackingMode === "custom") return h;
-            const today = new Date().toISOString().slice(0, 10);
+            const today = formatLocalDateKey(new Date());
             const filled = completionDayFilled(h.completions[today]);
             return {
               ...h,

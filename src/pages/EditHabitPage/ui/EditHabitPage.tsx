@@ -7,6 +7,7 @@ import {
   useHabitStore,
   type HabitCategoryTag,
   type HabitIconId,
+  type HabitStreakInterval,
 } from "@/entities/habit";
 import { HabitCategoriesField } from "@/features/habitCategories";
 import { HabitStreakGoalField } from "@/features/habitStreakGoal";
@@ -35,8 +36,8 @@ export const EditHabitPage = () => {
   const [categoryTags, setCategoryTags] = useState<HabitCategoryTag[]>(
     existing?.categoryTags ?? [],
   );
-  const [streakGoal, setStreakGoal] = useState<number | undefined>(
-    existing?.streakGoal,
+  const [streakInterval, setStreakInterval] = useState<HabitStreakInterval>(
+    existing?.streakInterval ?? "none",
   );
   const [trackingMode, setTrackingMode] = useState<"step" | "custom">(
     existing?.trackingMode === "custom" ? "custom" : "step",
@@ -77,8 +78,8 @@ export const EditHabitPage = () => {
       color,
       icon,
       categoryTags: categoryTags.length ? categoryTags : undefined,
-      streakGoal:
-        streakGoal != null && streakGoal > 0 ? streakGoal : undefined,
+      streakInterval: streakInterval === "none" ? undefined : streakInterval,
+      streakGoal: undefined,
       trackingMode,
       dailyGoal,
     };
@@ -216,7 +217,10 @@ export const EditHabitPage = () => {
               onChange={setCategoryTags}
             />
 
-            <HabitStreakGoalField value={streakGoal} onChange={setStreakGoal} />
+            <HabitStreakGoalField
+              value={streakInterval}
+              onChange={setStreakInterval}
+            />
           </div>
 
           <button

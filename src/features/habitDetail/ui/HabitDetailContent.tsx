@@ -8,9 +8,12 @@ import {
 } from "react";
 import {
   completionDayFilled,
+  computeHabitStreak,
+  formatLocalDateKey,
   getCompletionNumericValue,
   type Habit,
 } from "@/entities/habit";
+import { formatStreakGoalSummary } from "@/features/habitStreakGoal";
 import { DotGrid } from "@/shared/ui/habitDotGrid/DotGrid";
 import { HabitIcon } from "@/shared/ui/habitIcon/HabitIcon";
 import { Button } from "@/shared/ui/shadCNComponents/ui/button";
@@ -60,11 +63,6 @@ function calendarMonthDiff(fromMonthStart: Date, toMonthStart: Date): number {
 }
 
 const CALENDAR_SWIPER_SPEED = 280;
-
-/** Локальная дата YYYY-MM-DD (как в completions). */
-function formatLocalDateStr(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
 
 /** 6 недель × 7 дней с понедельника: хвост прошлого месяца + месяц + начало следующего. */
 /** Фон отмеченного дня: тот же оттенок привычки, но темнее (число дня без изменений). */
@@ -117,6 +115,13 @@ export const HabitDetailContent = ({
   }, [centerMonth]);
 
   const monthLabel = `${MONTH_NAMES_RU[centerMonth.getMonth()] ?? ""} ${centerMonth.getFullYear()}`;
+
+  const streakInterval = habit.streakInterval ?? "none";
+  const streakGoalLabel =
+    streakInterval === "none"
+      ? "Нет цели серии"
+      : formatStreakGoalSummary(streakInterval);
+  const streakCount = computeHabitStreak(habit);
 
   const handleSlideChangeEnd = useCallback((sw: SwiperClass) => {
     if (sw.activeIndex === 0) {
@@ -218,8 +223,11 @@ export const HabitDetailContent = ({
       />
 
       <div className=" flex items-center gap-2">
-        <Chip>Нет цели серии</Chip>
-        <Chip>💧 0</Chip>
+        <Chip>{streakGoalLabel}</Chip>
+        <Chip>
+          <span aria-hidden>💧</span>{" "}
+          <span className="tabular-nums">{streakCount}</span>
+        </Chip>
         <div className="flex-1" />
         <Button
           type="button"
@@ -347,7 +355,7 @@ function MonthDayGrid({
   return (
     <div className="grid grid-cols-7 grid-rows-6 gap-1">
       {cells.map(({ date, inCurrentMonth }) => {
-        const dateStr = formatLocalDateStr(date);
+        const dateStr = formatLocalDateKey(date);
         const raw = habit.completions[dateStr];
         const done = completionDayFilled(raw);
         const amount =

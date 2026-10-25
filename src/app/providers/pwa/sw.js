@@ -10,25 +10,88 @@ import { CacheFirst, NetworkFirst } from "workbox-strategies";
 
 precacheAndRoute(self.__WB_MANIFEST);
 cleanupOutdatedCaches();
-clientsClaim();
-self.skipWaiting();
+
+self.addEventListener("message", (event) => {
+  const data = event.data;
+  if (!data || typeof data !== "object") return;
+
+  if (data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+    return;
+  }
+
+  if (data.type === "SHOW_NOTIFICATION") {
+    const { title, body, url, tag } = data;
+    event.waitUntil(
+      showReminderNotification({
+        title,
+        body,
+        url,
+        tag: tag || "habit-reminder",
+      }),
+    );
+    return;
+  }
+
+  if (data.type === "SCHEDULE_REMINDERS") {
+    const tagPrefix = data.tagPrefix || DEFAULT_TAG_PREFIX;
+    const items = Array.isArray(data.items) ? data.items : [];
+    event.waitUntil(scheduleReminderItems(items, tagPrefix));
+  }
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    (async () => {
+      await clientsClaim();
+      await catchUpDueReminders();
+    })(),
+  );
+});
 
 registerRoute(
-  ({ request }) =>
-    ["script", "style", "image", "font"].includes(request.destination),
+  ({ request, url }) =>
+    request.destination === "font" ||
+    /\.(?:woff2?|ttf|otf)$/i.test(url.pathname),
   new CacheFirst({
-    cacheName: "static-assets-cache",
+    cacheName: "font-cache",
     plugins: [
       new ExpirationPlugin({
-        maxEntries: 100,
-        maxAgeSeconds: 60 * 60 * 24 * 7,
+        maxEntries: 40,
+        maxAgeSeconds: 60 * 60 * 24 * 365,
       }),
     ],
   }),
 );
 
 registerRoute(
-  ({ url }) => url.origin === "https://habit-backend.onrender.com",
+  ({ request }) =>
+    ["script", "style", "image"].includes(request.destination),
+  new CacheFirst({
+    cacheName: "static-assets-cache",
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 200,
+        maxAgeSeconds: 60 * 60 * 24 * 30,
+      }),
+    ],
+  }),
+);
+
+const apiOrigin = (() => {
+  try {
+    return self.location.origin;
+  } catch {
+    return "";
+  }
+})();
+
+registerRoute(
+  ({ url, request }) => {
+    if (request.method !== "GET") return false;
+    if (url.origin === "https://habit-backend.onrender.com") return true;
+    return Boolean(apiOrigin) && url.origin === apiOrigin && url.pathname.startsWith("/api");
+  },
   new NetworkFirst({
     cacheName: "api-cache",
     networkTimeoutSeconds: 3,
@@ -41,7 +104,11 @@ registerRoute(
   }),
 );
 
-registerRoute(new NavigationRoute(createHandlerBoundToURL("/index.html")));
+registerRoute(
+  new NavigationRoute(createHandlerBoundToURL("/index.html"), {
+    denylist: [/^\/api\//, /^\/sw\.js$/, /^\/workbox-.*\.js$/],
+  }),
+);
 
 const IDB_NAME = "habit-reminders";
 const IDB_VERSION = 2;
@@ -142,8 +209,8 @@ async function clearTriggeredByPrefix(tagPrefix) {
 async function showReminderNotification(item, { withTrigger = false } = {}) {
   const options = {
     body: item.body,
-    icon: "/logo.svg",
-    badge: "/logo.svg",
+    icon: "/pwa-192x192.png",
+    badge: "/pwa-192x192.png",
     data: item.url || "/",
     tag: item.tag || "habit-reminder",
     renotify: true,
@@ -153,10 +220,7 @@ async function showReminderNotification(item, { withTrigger = false } = {}) {
     options.showTrigger = new TimestampTrigger(item.at);
   }
 
-  await self.registration.showNotification(
-    item.title || "habit",
-    options,
-  );
+  await self.registration.showNotification(item.title || "habit+", options);
 }
 
 async function scheduleReminderItems(items, tagPrefix) {
@@ -220,11 +284,11 @@ self.addEventListener("push", (event) => {
 
   const data = event.data.json();
 
-  const title = data.title || "habit";
+  const title = data.title || "habit+";
   const options = {
     body: data.body,
-    icon: "/logo.svg",
-    badge: "/logo.svg",
+    icon: "/pwa-192x192.png",
+    badge: "/pwa-192x192.png",
     data: data.url || "/",
   };
 
@@ -238,30 +302,6 @@ self.addEventListener("notificationclick", (event) => {
       ? event.notification.data
       : event.notification.data?.url || "/";
   event.waitUntil(focusOrOpen(url));
-});
-
-self.addEventListener("message", (event) => {
-  const data = event.data;
-  if (!data || typeof data !== "object") return;
-
-  if (data.type === "SHOW_NOTIFICATION") {
-    const { title, body, url, tag } = data;
-    event.waitUntil(
-      showReminderNotification({
-        title,
-        body,
-        url,
-        tag: tag || "habit-reminder",
-      }),
-    );
-    return;
-  }
-
-  if (data.type === "SCHEDULE_REMINDERS") {
-    const tagPrefix = data.tagPrefix || DEFAULT_TAG_PREFIX;
-    const items = Array.isArray(data.items) ? data.items : [];
-    event.waitUntil(scheduleReminderItems(items, tagPrefix));
-  }
 });
 
 self.addEventListener("periodicsync", (event) => {

@@ -1,140 +1,64 @@
 import type { ManifestOptions } from "vite-plugin-pwa";
 
-const SCREENSHOT_SIZE = "488x1055";
-const SCREENSHOT_TYPE = "image/png";
-
 export const pwaManifest: Partial<ManifestOptions> = {
   id: "/",
-  name: "habit",
-  short_name: "habit",
-  description: "Фитнес-дневник тренировок",
+  name: "habit+",
+  short_name: "habit+",
+  description: "Трекер привычек — работает офлайн на телефоне",
   lang: "ru",
+  dir: "ltr",
   theme_color: "#0d0d0d",
   background_color: "#0d0d0d",
   display: "standalone",
+  display_override: ["standalone", "minimal-ui"],
+  orientation: "portrait-primary",
   scope: "/",
   start_url: "/",
+  categories: ["lifestyle", "health", "productivity"],
   icons: [
     {
       src: "/pwa-192x192.png",
       type: "image/png",
       sizes: "192x192",
+      purpose: "any",
     },
     {
       src: "/pwa-512x512.png",
       type: "image/png",
       sizes: "512x512",
+      purpose: "any",
     },
     {
       src: "/pwa-512x512-maskable.png",
       type: "image/png",
       sizes: "512x512",
-      purpose: "any maskable",
-    },
-    {
-      src: "/logo.svg",
-      type: "image/svg+xml",
-      sizes: "any",
+      purpose: "maskable",
     },
   ],
   shortcuts: [
     {
-      name: "Training Day",
-      description: "View trainings for today",
+      name: "Сегодня",
+      description: "Открыть привычки на сегодня",
       url: "/",
       icons: [
         {
-          src: "/screen/training_week_exercise_list.png",
-          sizes: SCREENSHOT_SIZE,
-          type: SCREENSHOT_TYPE,
+          src: "/pwa-192x192.png",
+          sizes: "192x192",
+          type: "image/png",
         },
       ],
     },
-  ],
-  screenshots: [
     {
-      src: "/screen/analytics_filters_kpis.png",
-      type: SCREENSHOT_TYPE,
-      sizes: SCREENSHOT_SIZE,
-      form_factor: "narrow",
-    },
-    {
-      src: "/screen/analytics_load_progress_chart.png",
-      type: SCREENSHOT_TYPE,
-      sizes: SCREENSHOT_SIZE,
-      form_factor: "narrow",
-    },
-    {
-      src: "/screen/exercises_categories_legs_expanded.png",
-      type: SCREENSHOT_TYPE,
-      sizes: SCREENSHOT_SIZE,
-      form_factor: "narrow",
-    },
-    {
-      src: "/screen/exercises_categories_with_presets.png",
-      type: SCREENSHOT_TYPE,
-      sizes: SCREENSHOT_SIZE,
-      form_factor: "narrow",
-    },
-    {
-      src: "/screen/exercises_create_modal.png",
-      type: SCREENSHOT_TYPE,
-      sizes: SCREENSHOT_SIZE,
-      form_factor: "narrow",
-    },
-    {
-      src: "/screen/exercises_edit_preset_modal.png",
-      type: SCREENSHOT_TYPE,
-      sizes: SCREENSHOT_SIZE,
-      form_factor: "narrow",
-    },
-    {
-      src: "/screen/exercises_presets_list.png",
-      type: SCREENSHOT_TYPE,
-      sizes: SCREENSHOT_SIZE,
-      form_factor: "narrow",
-    },
-    {
-      src: "/screen/settings_calendar_goals_backup.png",
-      type: SCREENSHOT_TYPE,
-      sizes: SCREENSHOT_SIZE,
-      form_factor: "narrow",
-    },
-    {
-      src: "/screen/settings_theme_selection.png",
-      type: SCREENSHOT_TYPE,
-      sizes: SCREENSHOT_SIZE,
-      form_factor: "narrow",
-    },
-    {
-      src: "/screen/timer_idle_screen.png",
-      type: SCREENSHOT_TYPE,
-      sizes: SCREENSHOT_SIZE,
-      form_factor: "narrow",
-    },
-    {
-      src: "/screen/training_calendar_exercise_expanded.png",
-      type: SCREENSHOT_TYPE,
-      sizes: SCREENSHOT_SIZE,
-      form_factor: "narrow",
-    },
-    {
-      src: "/screen/training_calendar_exercise_list.png",
-      type: SCREENSHOT_TYPE,
-      sizes: SCREENSHOT_SIZE,
-      form_factor: "narrow",
-    },
-    {
-      src: "/screen/training_week_bench_expanded.png",
-      type: SCREENSHOT_TYPE,
-      sizes: SCREENSHOT_SIZE,
-      form_factor: "narrow",
-    },
-    {
-      src: "/screen/training_week_exercise_list.png",
-      type: SCREENSHOT_TYPE,
-      sizes: SCREENSHOT_SIZE,
-      form_factor: "narrow",
+      name: "Настройки",
+      description: "Тема, бэкап и установка",
+      url: "/settings",
+      icons: [
+        {
+          src: "/pwa-192x192.png",
+          sizes: "192x192",
+          type: "image/png",
+        },
+      ],
     },
   ],
 };

@@ -11,7 +11,8 @@ function isHabitShellPath(pathname: string): boolean {
     pathname === "/" ||
     pathname === "/add" ||
     pathname.startsWith("/edit/") ||
-    pathname === "/settings"
+    pathname === "/settings" ||
+    pathname.startsWith("/settings/")
   );
 }
 

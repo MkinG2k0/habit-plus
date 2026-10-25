@@ -15,18 +15,26 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       strategies: "injectManifest",
-      registerType: "autoUpdate",
+      registerType: "prompt",
+      injectRegister: false,
       includeAssets: [
         "logo.svg",
         "logo.png",
         "pwa-192x192.png",
         "pwa-512x512.png",
         "pwa-512x512-maskable.png",
-        "icons/*.svg",
       ],
       manifest: pwaManifest,
       srcDir: "src/app/providers/pwa",
       filename: "sw.js",
+      injectManifest: {
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,woff,woff2,ttf}"],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+      },
+      devOptions: {
+        enabled: false,
+        type: "module",
+      },
     }),
   ],
   server: {

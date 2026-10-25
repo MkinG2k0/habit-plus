@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { PwaSettingsCard } from "@/features/pwa";
 import { Card } from "@/shared/ui/shadCNComponents/ui/card";
 import { cn } from "@/shared/ui/lib/utils";
 
@@ -108,6 +109,8 @@ export const SettingsPage = () => {
           </div>
           <ChevronIcon />
         </button>
+
+        <PwaSettingsCard iconClass={ICON_BOX[0]} />
 
         {sections.map((sec) => (
           <div key={sec.title} className="mb-5">

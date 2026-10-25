@@ -33,10 +33,25 @@ body {
   overflow: hidden;
   min-height: 100dvh;
   height: 100%;
+  /* Chrome mobile: no text selection / translate popup on tap */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 html {
   background-color: var(--background);
+}
+
+input,
+textarea,
+select,
+[contenteditable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
 }
 
 .disable-dbl-tap-zoom {

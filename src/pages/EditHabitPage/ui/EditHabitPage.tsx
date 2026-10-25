@@ -4,6 +4,7 @@ import {
   DEFAULT_HABIT_COLOR,
   foregroundOnHabitColor,
   HABIT_COLOR_OPTIONS,
+  HABIT_PRESET_CATEGORY_COLORS,
   useHabitStore,
   type HabitCategoryTag,
   type HabitIconId,
@@ -69,6 +70,7 @@ export const EditHabitPage = () => {
     setName(template.name);
     setDesc(template.desc);
     setCategoryTags([{ type: "preset", id: template.categoryId }]);
+    setColor(HABIT_PRESET_CATEGORY_COLORS[template.categoryId]);
   };
 
   const handleSave = () => {

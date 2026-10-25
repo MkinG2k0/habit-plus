@@ -23,6 +23,7 @@ export {
 } from "./model/appCategoryCatalog";
 export type { HabitPresetCategoryId } from "./model/habitPresetCategories";
 export {
+  HABIT_PRESET_CATEGORY_COLORS,
   HABIT_PRESET_CATEGORY_IDS,
   HABIT_PRESET_CATEGORY_LABELS,
 } from "./model/habitPresetCategories";

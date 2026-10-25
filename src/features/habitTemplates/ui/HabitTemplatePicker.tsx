@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  HABIT_PRESET_CATEGORY_COLORS,
   HABIT_PRESET_CATEGORY_LABELS,
   HABIT_TEMPLATE_CATEGORY_IDS,
   getHabitTemplatesByCategory,
@@ -64,6 +65,7 @@ export const HabitTemplatePicker = ({
           <div className="flex flex-wrap gap-2">
             {HABIT_TEMPLATE_CATEGORY_IDS.map((id) => {
               const selected = categoryId === id;
+              const accent = HABIT_PRESET_CATEGORY_COLORS[id];
               return (
                 <button
                   key={id}
@@ -71,10 +73,13 @@ export const HabitTemplatePicker = ({
                   onClick={() => setCategoryId(id)}
                   className={cn(
                     "inline-flex max-w-full items-center gap-2 rounded-full border px-3 py-2 text-sm transition-colors",
-                    selected
-                      ? "border-primary bg-primary/15 text-foreground"
-                      : "border-border bg-card text-foreground",
+                    !selected && "bg-card",
                   )}
+                  style={{
+                    borderColor: accent,
+                    backgroundColor: selected ? `${accent}26` : undefined,
+                    color: accent,
+                  }}
                   aria-pressed={selected}
                 >
                   <PresetCategoryIcon id={id} size={16} />
@@ -87,27 +92,31 @@ export const HabitTemplatePicker = ({
           </div>
 
           <ul className="mt-4 space-y-2">
-            {templates.map((template) => (
-              <li key={template.id}>
-                <button
-                  type="button"
-                  onClick={() => handleSelect(template)}
-                  className={cn(
-                    "w-full rounded-xl border border-border bg-card px-3.5 py-3 text-left transition-colors",
-                    "hover:bg-muted/40 active:bg-muted/60",
-                  )}
-                >
-                  <div className="text-[15px] font-medium text-foreground">
-                    {template.name}
-                  </div>
-                  {template.desc !== template.name ? (
-                    <div className="mt-1 line-clamp-2 text-[13px] text-muted-foreground">
-                      {template.desc}
+            {templates.map((template) => {
+              const accent = HABIT_PRESET_CATEGORY_COLORS[template.categoryId];
+              return (
+                <li key={template.id}>
+                  <button
+                    type="button"
+                    onClick={() => handleSelect(template)}
+                    className={cn(
+                      "w-full rounded-xl border border-border bg-card px-3.5 py-3 text-left transition-colors",
+                      "hover:bg-muted/40 active:bg-muted/60",
+                    )}
+                    style={{ borderLeftWidth: 3, borderLeftColor: accent }}
+                  >
+                    <div className="text-[15px] font-medium text-foreground">
+                      {template.name}
                     </div>
-                  ) : null}
-                </button>
-              </li>
-            ))}
+                    {template.desc !== template.name ? (
+                      <div className="mt-1 line-clamp-2 text-[13px] text-muted-foreground">
+                        {template.desc}
+                      </div>
+                    ) : null}
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         </div>
 

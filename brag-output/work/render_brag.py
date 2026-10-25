@@ -31,25 +31,34 @@ def expand_glob(pattern: str) -> list[str]:
     return [f.name for f in files]
 
 
+# Complex UI beats keep the +0.3s hold; simple screens stay snappy.
+_HOLD = 0.3
+
 BEATS: list[tuple[str | list[str], float, str]] = [
-    ("01-empty-home.png", 2.6, "habit+"),
-    ("02-form-empty.png", 1.3, "Создай привычку"),
-    (expand_glob("type-name-*.png"), 1.5, "Создай привычку"),
-    (expand_glob("type-desc-*.png"), 2.0, "Создай привычку"),
-    ("05-form-color.png", 1.8, "Имя · описание · цвет"),
-    ("06-home-one-habit.png", 1.8, "Готово"),
-    ("07-list-view.png", 1.5, "Отметь дни"),
-    ("08-day-one.png", 1.2, "Отметь дни"),
-    ("09-day-two.png", 1.2, "Отметь дни"),
-    ("10-days-filled.png", 1.8, "Серия растёт"),
-    ("11-add-again.png", 1.5, "Или из шаблона"),
-    ("12-templates-open.png", 2.8, "Готовые привычки"),
-    ("13-template-filled.png", 1.8, "Прогулка с семьей"),
-    ("15-template-days.png", 2.0, "Ещё пара дней"),
-    ("16-view-grid.png", 2.2, "Карточки"),
-    ("17-view-list.png", 2.2, "Список"),
-    ("18-view-cols.png", 2.4, "Колонки"),
-    ("19-outro.png", 3.5, "habit+"),
+    # simple
+    ("01-empty-home.png", 1.7, "habit+"),
+    ("02-form-empty.png", 1.0, "Создай привычку"),
+    # complex: typing in inputs
+    (expand_glob("type-name-*.png"), 1.5 + _HOLD, "Создай привычку"),
+    (expand_glob("type-desc-*.png"), 2.0 + _HOLD, "Создай привычку"),
+    # complex: full form
+    ("05-form-color.png", 1.8 + _HOLD, "Имя · описание · цвет"),
+    # simple
+    ("06-home-one-habit.png", 1.2, "Готово"),
+    ("07-list-view.png", 1.1, "Отметь дни"),
+    ("08-day-one.png", 0.85, "Отметь дни"),
+    ("09-day-two.png", 0.85, "Отметь дни"),
+    ("10-days-filled.png", 1.2, "Серия растёт"),
+    ("11-add-again.png", 1.0, "Или из шаблона"),
+    # complex: templates drawer + filled form + two habits
+    ("12-templates-open.png", 2.8 + _HOLD, "Готовые привычки"),
+    ("13-template-filled.png", 1.8 + _HOLD, "Прогулка с семьей"),
+    ("15-template-days.png", 2.0 + _HOLD, "Ещё пара дней"),
+    # simple: view toggles
+    ("16-view-grid.png", 1.5, "Карточки"),
+    ("17-view-list.png", 1.5, "Список"),
+    ("18-view-cols.png", 1.6, "Колонки"),
+    ("19-outro.png", 2.4, "habit+"),
 ]
 
 

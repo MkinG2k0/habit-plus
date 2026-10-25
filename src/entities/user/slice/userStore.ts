@@ -1,6 +1,7 @@
 import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
+import { zustandAppStorage } from "@/shared/lib/storageAdapter";
 import type { IUser } from "../model/types";
-import { persist } from "zustand/middleware";
 
 interface UserState {
   user: IUser;
@@ -28,6 +29,9 @@ export const useUserStore = create<UserState & ActionsState>()(
           accessToken: "",
         }),
     }),
-    { name: "user-store" },
+    {
+      name: "user-store",
+      storage: createJSONStorage(() => zustandAppStorage),
+    },
   ),
 );

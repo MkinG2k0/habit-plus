@@ -41,7 +41,7 @@ export const EditHabitPage = () => {
     existing?.categoryTags ?? [],
   );
   const [streakInterval, setStreakInterval] = useState<HabitStreakInterval>(
-    existing?.streakInterval ?? "none",
+    existing?.streakInterval ?? (isNew ? "daily" : "none"),
   );
   const [trackingMode, setTrackingMode] = useState<"step" | "custom">(
     existing?.trackingMode === "custom" ? "custom" : "step",

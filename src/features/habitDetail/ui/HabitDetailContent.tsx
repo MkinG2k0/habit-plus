@@ -22,6 +22,7 @@ import type { Swiper as SwiperClass } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import { Separator } from "@radix-ui/react-separator";
+import { Flame } from "lucide-react";
 
 const MONTH_NAMES_RU = [
   "Янв",
@@ -198,7 +199,24 @@ export const HabitDetailContent = ({
           <HabitIcon name={habit.icon} color={habit.color} size={20} />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-lg font-bold text-foreground">{habit.name}</div>
+          <div className="flex min-w-0 items-center gap-2">
+            <span
+              className="inline-flex shrink-0 items-center gap-0.5 tabular-nums text-muted-foreground"
+              aria-label={`Текущая серия: ${streakCount}`}
+            >
+              <Flame
+                size={14}
+                className="shrink-0 text-orange-500"
+                aria-hidden
+              />
+              <span className="text-sm font-medium text-foreground">
+                {streakCount}
+              </span>
+            </span>
+            <div className="min-w-0 truncate text-lg font-bold text-foreground">
+              {habit.name}
+            </div>
+          </div>
           <div className="text-sm text-muted-foreground">
             {habit.desc || "Нет описания"}
           </div>
@@ -224,10 +242,6 @@ export const HabitDetailContent = ({
 
       <div className=" flex items-center gap-2">
         <Chip>{streakGoalLabel}</Chip>
-        <Chip>
-          <span aria-hidden>💧</span>{" "}
-          <span className="tabular-nums">{streakCount}</span>
-        </Chip>
         <div className="flex-1" />
         <Button
           type="button"
@@ -380,23 +394,25 @@ function MonthDayGrid({
               !done && "hover:bg-muted/80 active:bg-muted",
               !done &&
                 (inCurrentMonth ? "text-foreground" : "text-muted-foreground"),
+              isToday &&
+                "border-foreground font-semibold shadow-[inset_0_2px_5px_0_rgb(0_0_0_/_0.45)]",
               isToday && !done && "bg-muted",
               done && "font-medium text-white",
-              isToday &&
-                done &&
-                "font-bold ring-2 ring-background ring-offset-1 ring-offset-card",
             )}
             style={
               done
                 ? { backgroundColor: habitDoneCellBackground(habit.color) }
                 : undefined
             }
+            aria-current={isToday ? "date" : undefined}
             aria-label={
               done
                 ? amount > 0
                   ? `Изменить значение ${amount} за ${dateStr}`
                   : `Снять отметку ${dateStr}`
-                : `Отметить выполнение ${dateStr}`
+                : isToday
+                  ? `Отметить выполнение на сегодня ${dateStr}`
+                  : `Отметить выполнение ${dateStr}`
             }
             aria-pressed={done}
           >
@@ -418,7 +434,9 @@ function MonthDayGrid({
 function Chip({ children }: { children: ReactNode }) {
   return (
     <div className="flex items-center gap-1.5 rounded-md bg-muted px-3.5 py-2">
-      <span className="text-sm text-foreground">{children}</span>
+      <span className="inline-flex items-center gap-1.5 text-sm text-foreground">
+        {children}
+      </span>
     </div>
   );
 }

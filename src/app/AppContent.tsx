@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { useHabitReminderScheduler } from "@/features/habitReminders";
-import { OfflineBanner, PwaUpdateToast } from "@/features/pwa";
+import { OfflineBanner, PwaInstallPrompt, PwaUpdateToast } from "@/features/pwa";
 import { AppRoutes } from "./router/routes.tsx";
 import { AppLayout } from "./layout/AppLayout.tsx";
 
@@ -19,6 +19,7 @@ export const AppContent = () => {
       >
         <AppRoutes />
       </Suspense>
+      <PwaInstallPrompt />
       <PwaUpdateToast />
     </AppLayout>
   );

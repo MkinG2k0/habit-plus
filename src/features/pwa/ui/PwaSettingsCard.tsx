@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card } from "@/shared/ui/shadCNComponents/ui/card";
 import { cn } from "@/shared/ui/lib/utils";
 import { useOnlineStatus } from "../lib/useOnlineStatus";
@@ -9,8 +10,17 @@ interface PwaSettingsCardProps {
 }
 
 export const PwaSettingsCard = ({ iconClass }: PwaSettingsCardProps) => {
-  const { canUse, isInstalled, canPrompt, promptInstall } = usePwaInstall();
+  const {
+    canUse,
+    isInstalled,
+    canPrompt,
+    canOfferInstall,
+    isIosSafari,
+    promptInstall,
+  } = usePwaInstall();
   const isOnline = useOnlineStatus();
+  const [showIosGuide, setShowIosGuide] = useState(false);
+  const [isPrompting, setIsPrompting] = useState(false);
 
   if (!canUse || !isWebPwaRuntime()) {
     return null;
@@ -20,11 +30,24 @@ export const PwaSettingsCard = ({ iconClass }: PwaSettingsCardProps) => {
     ? "Установлено как приложение"
     : canPrompt
       ? "Можно установить на домашний экран"
-      : "Откройте в браузере Chrome / Safari для установки";
+      : isIosSafari
+        ? "Добавьте на домашний экран через Safari"
+        : "Откройте в браузере Chrome / Safari для установки";
 
   const offlineLabel = isOnline
     ? "Онлайн — shell кэшируется для офлайна"
     : "Офлайн — привычки доступны локально";
+
+  const onInstallClick = () => {
+    if (isIosSafari || !canPrompt) {
+      setShowIosGuide((open) => !open);
+      return;
+    }
+    setIsPrompting(true);
+    void promptInstall().finally(() => {
+      setIsPrompting(false);
+    });
+  };
 
   return (
     <div className="mb-5">
@@ -49,13 +72,12 @@ export const PwaSettingsCard = ({ iconClass }: PwaSettingsCardProps) => {
                   {statusLabel}
                 </p>
               </div>
-              {canPrompt ? (
+              {canOfferInstall ? (
                 <button
                   type="button"
-                  className="shrink-0 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"
-                  onClick={() => {
-                    void promptInstall();
-                  }}
+                  disabled={isPrompting}
+                  className="shrink-0 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground disabled:opacity-60"
+                  onClick={onInstallClick}
                 >
                   Установить
                 </button>
@@ -80,11 +102,12 @@ export const PwaSettingsCard = ({ iconClass }: PwaSettingsCardProps) => {
               </div>
             </div>
           </li>
-          {!isInstalled && !canPrompt ? (
+          {showIosGuide || (!isInstalled && !canPrompt) ? (
             <li>
               <p className="px-3.5 py-3 text-xs leading-relaxed text-muted-foreground">
-                iPhone: «Поделиться» → «На экран „Домой“». Android Chrome: меню →
-                «Установить приложение» или «Добавить на главный экран».
+                {isIosSafari
+                  ? "iPhone: «Поделиться» → «На экран „Домой“»."
+                  : "Android Chrome: меню → «Установить приложение» или «Добавить на главный экран». iPhone: «Поделиться» → «На экран „Домой“»."}
               </p>
             </li>
           ) : null}

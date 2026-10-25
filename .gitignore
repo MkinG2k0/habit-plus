@@ -28,3 +28,9 @@ dist-ssr
 .vite
 .env
 .vercel
+
+# Brag: final video + heavy render intermediates (rebuild via work/render_brag.py)
+brag-output/**/*.mp4
+brag-output/work/frames/
+brag-output/work/*.wav
+brag-output/work/_check_*.jpg

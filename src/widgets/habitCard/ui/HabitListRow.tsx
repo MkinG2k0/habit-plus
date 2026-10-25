@@ -40,10 +40,10 @@ export const HabitListRow = ({
         <HabitIcon name={habit.icon} color={habit.color} size={16} />
       </div>
       <div className="flex min-w-0 flex-1 items-center gap-1.5">
+        <HabitStreakBadge habit={habit} size="sm" />
         <div className="min-w-0 truncate text-[15px] font-medium text-foreground">
           {habit.name}
         </div>
-        <HabitStreakBadge habit={habit} size="sm" />
       </div>
       <div
         className="flex gap-1.5"
@@ -56,7 +56,11 @@ export const HabitListRow = ({
             <button
               key={day.key}
               type="button"
-              className="size-7 shrink-0 cursor-pointer rounded-md transition-colors"
+              className={cn(
+                "size-7 shrink-0 cursor-pointer rounded-md transition-colors",
+                day.isToday &&
+                  "ring-2 ring-foreground ring-offset-1 ring-offset-card",
+              )}
               style={{
                 backgroundColor: filled ? habit.color : `${habit.color}25`,
               }}
@@ -64,7 +68,12 @@ export const HabitListRow = ({
                 e.stopPropagation();
                 onToggleDay(day.key);
               }}
-              aria-label={`Переключить ${day.label} ${day.date}`}
+              aria-current={day.isToday ? "date" : undefined}
+              aria-label={
+                day.isToday
+                  ? `Переключить сегодня ${day.label} ${day.date}`
+                  : `Переключить ${day.label} ${day.date}`
+              }
             />
           );
         })}

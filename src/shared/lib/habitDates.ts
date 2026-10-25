@@ -1,4 +1,7 @@
-import { completionDayFilled } from "@/entities/habit/model/habitCompletion";
+import {
+  completionDayFilled,
+  formatLocalDateKey,
+} from "@/entities/habit";
 import { useMemo } from "react";
 
 const DAY_NAMES_RU = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
@@ -11,7 +14,7 @@ export interface DayInfo {
 }
 
 export function useTodayKey(): string {
-  return useMemo(() => new Date().toISOString().slice(0, 10), []);
+  return useMemo(() => formatLocalDateKey(new Date()), []);
 }
 
 export function useLastNDays(n: number): DayInfo[] {
@@ -20,7 +23,7 @@ export function useLastNDays(n: number): DayInfo[] {
       const d = new Date();
       d.setDate(d.getDate() - (n - 1 - i));
       return {
-        key: d.toISOString().slice(0, 10),
+        key: formatLocalDateKey(d),
         label: DAY_NAMES_RU[d.getDay()] ?? "",
         date: d.getDate(),
         isToday: i === n - 1,
@@ -48,7 +51,10 @@ export function formatMonthYearRu(d: Date): string {
   return `${MONTH_NAMES_RU[d.getMonth()] ?? ""} ${d.getFullYear()}`;
 }
 
-/** День в UTC, как в `habitStore` (`toISOString().slice(0, 10)`). */
+/**
+ * День в UTC (YYYY-MM-DD). Для completions/UI предпочитай `formatLocalDateKey` —
+ * ключи привычек хранятся в локальной дате.
+ */
 export function getIsoDayKeyUtc(d: Date): string {
   return d.toISOString().slice(0, 10);
 }

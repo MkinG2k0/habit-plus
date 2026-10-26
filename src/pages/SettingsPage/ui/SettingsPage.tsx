@@ -45,7 +45,13 @@ export const SettingsPage = () => {
           iconClass: ICON_BOX[4],
           to: "/settings/backup",
         },
-        { icon: "📋", label: "Отсортировать привычки", iconClass: ICON_BOX[5] },
+        {
+          icon: "🧭",
+          label: "Квиз баланса сфер",
+          iconClass: ICON_BOX[5],
+          to: "/quiz",
+        },
+        { icon: "📋", label: "Отсортировать привычки", iconClass: ICON_BOX[0] },
       ],
     },
   ];

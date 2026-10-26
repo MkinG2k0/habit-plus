@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { QuizFirstLaunchGate } from "@/features/lifeBalanceQuiz";
 import { useHabitReminderScheduler } from "@/features/habitReminders";
 import { OfflineBanner, PwaInstallPrompt, PwaUpdateToast } from "@/features/pwa";
 import { AppRoutes } from "./router/routes.tsx";
@@ -10,6 +11,7 @@ export const AppContent = () => {
   return (
     <AppLayout>
       <OfflineBanner />
+      <QuizFirstLaunchGate />
       <Suspense
         fallback={
           <div className="flex flex-1 items-center justify-center text-muted-foreground">

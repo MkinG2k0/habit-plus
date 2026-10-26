@@ -1,6 +1,11 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  CLUB_IMPORT_QUIZ_HINT,
+  ClubTrackerParseError,
+  importClubTrackerFile,
+} from "@/features/clubTrackerImport";
+import {
   applyBackupSnapshot,
   BackupParseError,
   createBackupSnapshot,
@@ -8,6 +13,7 @@ import {
   readBackupFromFile,
   serializeBackup,
 } from "@/features/dataBackup";
+import { useQuizOnboardingStore } from "@/features/lifeBalanceQuiz";
 import { Button } from "@/shared/ui/shadCNComponents/ui/button";
 import { Card } from "@/shared/ui/shadCNComponents/ui/card";
 
@@ -20,6 +26,7 @@ type Status =
 export const DataBackupPage = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const clubInputRef = useRef<HTMLInputElement>(null);
   const [status, setStatus] = useState<Status>({ kind: "idle" });
 
   const exportBackup = async () => {
@@ -76,6 +83,26 @@ export const DataBackupPage = () => {
     }
   };
 
+  const onPickClubTracker = async (file: File | undefined) => {
+    if (!file) return;
+
+    setStatus({ kind: "busy", message: "Читаю таблицу клуба…" });
+    try {
+      const outcome = await importClubTrackerFile(file);
+      useQuizOnboardingStore.getState().markQuizDone();
+      setStatus({
+        kind: "ok",
+        message: `${outcome.statsMessage} ${CLUB_IMPORT_QUIZ_HINT}`,
+      });
+    } catch (err) {
+      const message =
+        err instanceof ClubTrackerParseError
+          ? err.message
+          : "Не удалось импортировать Excel.";
+      setStatus({ kind: "error", message });
+    }
+  };
+
   const busy = status.kind === "busy";
 
   return (
@@ -122,11 +149,11 @@ export const DataBackupPage = () => {
           </div>
         </Card>
 
-        <Card className="gap-0 overflow-hidden border p-0 shadow-none">
+        <Card className="mb-3 gap-0 overflow-hidden border p-0 shadow-none">
           <div className="border-b border-border px-4 py-3.5">
-            <div className="text-[15px] font-medium">Импорт</div>
+            <div className="text-[15px] font-medium">Импорт бэкапа</div>
             <p className="mt-1 text-xs text-muted-foreground">
-              Заменит текущие данные содержимым файла бэкапа.
+              Заменит текущие данные содержимым JSON-бэкапа.
             </p>
           </div>
           <div className="px-4 py-3.5">
@@ -149,6 +176,38 @@ export const DataBackupPage = () => {
               onClick={() => fileInputRef.current?.click()}
             >
               Выбрать файл бэкапа
+            </Button>
+          </div>
+        </Card>
+
+        <Card className="gap-0 overflow-hidden border p-0 shadow-none">
+          <div className="border-b border-border px-4 py-3.5">
+            <div className="text-[15px] font-medium">Импорт КОД Трекер</div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Excel клуба (.xlsx): создаст отсутствующие привычки и проставит
+              галочки. Текущие данные не затирает.
+            </p>
+          </div>
+          <div className="px-4 py-3.5">
+            <input
+              ref={clubInputRef}
+              type="file"
+              accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                e.target.value = "";
+                void onPickClubTracker(file);
+              }}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              disabled={busy}
+              onClick={() => clubInputRef.current?.click()}
+            >
+              Выбрать таблицу клуба
             </Button>
           </div>
         </Card>

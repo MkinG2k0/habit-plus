@@ -18,6 +18,11 @@ const SettingsPage = lazy(() =>
 const DataBackupPage = lazy(() =>
   import("@/pages/DataBackupPage").then((m) => ({ default: m.DataBackupPage })),
 );
+const LifeBalanceQuizPage = lazy(() =>
+  import("@/pages/LifeBalanceQuizPage").then((m) => ({
+    default: m.LifeBalanceQuizPage,
+  })),
+);
 
 export const AppRoutes = () => {
   return (
@@ -27,6 +32,14 @@ export const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <HomePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/quiz"
+        element={
+          <ProtectedRoute>
+            <LifeBalanceQuizPage />
           </ProtectedRoute>
         }
       />

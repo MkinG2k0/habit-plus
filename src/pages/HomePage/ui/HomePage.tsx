@@ -5,6 +5,7 @@ import {
   useHabitStore,
   type Habit,
 } from "@/entities/habit";
+import { ClubTrackerImportButton } from "@/features/clubTrackerImport";
 import {
   buildHomeCategoryFilterChips,
   categoryFiltersEqual,
@@ -13,6 +14,7 @@ import {
 } from "@/features/habitCategories";
 import { HabitCustomValueDrawer } from "@/features/habitCustomValue";
 import { HabitDetailDrawer } from "@/features/habitDetail";
+import { useQuizOnboardingStore } from "@/features/lifeBalanceQuiz";
 import { useLastNDays, useTodayKey } from "@/shared/lib/habitDates";
 import { Badge } from "@/shared/ui/shadCNComponents/ui/badge";
 import { Button } from "@/shared/ui/shadCNComponents/ui/button";
@@ -30,6 +32,7 @@ export const HomePage = () => {
   const navigate = useNavigate();
   const { habits, viewMode, setViewMode, toggleToday, toggleDateCompletion } =
     useHabitStore();
+  const quizDone = useQuizOnboardingStore((s) => s.hasCompletedOrSkippedQuiz);
   const today = useTodayKey();
   const last5 = useLastNDays(5);
   const [categoryFilter, setCategoryFilter] = useState<HabitCategoryFilter>(null);
@@ -156,13 +159,18 @@ export const HomePage = () => {
           )}
         >
           {habits.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">
+            <div className="flex flex-col items-center justify-center gap-4 px-2 py-16 text-center">
               <p className="text-muted-foreground">
-                Добавьте первую привычку, чтобы начать трекинг.
+                {quizDone
+                  ? "Добавьте первую привычку или загрузите таблицу клуба."
+                  : "Добавьте первую привычку, чтобы начать трекинг."}
               </p>
               <Button type="button" onClick={() => navigate("/add")}>
                 Новая привычка
               </Button>
+              {quizDone ? (
+                <ClubTrackerImportButton className="max-w-sm" />
+              ) : null}
             </div>
           ) : filteredHabits.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-4 py-16 text-center">

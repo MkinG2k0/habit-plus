@@ -9,6 +9,7 @@ interface AppLayoutProps {
 function isHabitShellPath(pathname: string): boolean {
   return (
     pathname === "/" ||
+    pathname === "/quiz" ||
     pathname === "/add" ||
     pathname.startsWith("/edit/") ||
     pathname === "/settings" ||
@@ -23,7 +24,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   if (habitShell) {
     return (
       <div
-        className="mx-auto flex h-dvh min-h-dvh w-full max-w-5xl flex-col overflow-hidden bg-background text-foreground
+        className="mx-auto flex h-dvh min-h-dvh w-full max-w-app-shell flex-col overflow-hidden bg-background text-foreground
         pt-[max(0,env(safe-area-inset-top,0px))]
         pr-[max(0,env(safe-area-inset-right,0px))]
         pb-[max(0,env(safe-area-inset-bottom,0px))]
@@ -36,8 +37,8 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
 
   return (
     <div
-      className="flex h-dvh min-h-dvh flex-col overflow-x-hidden overflow-y-auto gap-2 bg-background text-foreground
-    mx-auto max-w-5xl
+      className="flex h-dvh min-h-dvh w-full flex-col overflow-x-hidden overflow-y-auto gap-2 bg-background text-foreground
+    mx-auto max-w-app-shell
     pt-[max(0.75rem,env(safe-area-inset-top,0px))]
     pr-[max(0.5rem,env(safe-area-inset-right,0px))]
     pb-[max(1rem,env(safe-area-inset-bottom,0px))]

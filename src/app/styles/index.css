@@ -60,6 +60,8 @@ select,
 
 @theme inline {
   --font-numeric: "DM Mono", ui-monospace, monospace;
+  /* Mobile-first shell: keeps PC layout from stretching across the viewport */
+  --max-width-app-shell: 28rem;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);

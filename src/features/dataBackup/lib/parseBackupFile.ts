@@ -17,7 +17,7 @@ export const parseBackupJson = (raw: string): HabitPlusBackup => {
 
   if (!isHabitPlusBackup(parsed)) {
     throw new BackupParseError(
-      "Это не бэкап habit+. Выберите файл, сохранённый через «Экспорт».",
+      "Это не бэкап Habiday. Выберите файл, сохранённый через «Экспорт».",
     );
   }
 

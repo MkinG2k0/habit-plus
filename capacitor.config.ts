@@ -3,7 +3,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
   appId: "com.habit.myapp",
-  appName: "habit+",
+  appName: "Habiday - трекер привычек",
   webDir: "dist",
   plugins: {
     LocalNotifications: {

@@ -31,34 +31,32 @@ def expand_glob(pattern: str) -> list[str]:
     return [f.name for f in files]
 
 
-# Complex UI beats keep the +0.3s hold; simple screens stay snappy.
+# Complex UI beats keep an extra hold; all beats +0.3s for slower transitions.
 _HOLD = 0.3
+_SLOWER = 0.3
 
 BEATS: list[tuple[str | list[str], float, str]] = [
-    # simple
-    ("01-empty-home.png", 1.7, "habit+"),
-    ("02-form-empty.png", 1.0, "Создай привычку"),
-    # complex: typing in inputs
-    (expand_glob("type-name-*.png"), 1.5 + _HOLD, "Создай привычку"),
-    (expand_glob("type-desc-*.png"), 2.0 + _HOLD, "Создай привычку"),
-    # complex: full form
-    ("05-form-color.png", 1.8 + _HOLD, "Имя · описание · цвет"),
-    # simple
-    ("06-home-one-habit.png", 1.2, "Готово"),
-    ("07-list-view.png", 1.1, "Отметь дни"),
-    ("08-day-one.png", 0.85, "Отметь дни"),
-    ("09-day-two.png", 0.85, "Отметь дни"),
-    ("10-days-filled.png", 1.2, "Серия растёт"),
-    ("11-add-again.png", 1.0, "Или из шаблона"),
-    # complex: templates drawer + filled form + two habits
-    ("12-templates-open.png", 2.8 + _HOLD, "Готовые привычки"),
-    ("13-template-filled.png", 1.8 + _HOLD, "Прогулка с семьей"),
-    ("15-template-days.png", 2.0 + _HOLD, "Ещё пара дней"),
-    # simple: view toggles
-    ("16-view-grid.png", 1.5, "Карточки"),
-    ("17-view-list.png", 1.5, "Список"),
-    ("18-view-cols.png", 1.6, "Колонки"),
-    ("19-outro.png", 2.4, "habit+"),
+    # quiz onboarding
+    ("01-quiz-intro.png", 1.8 + _SLOWER, "Баланс сфер"),
+    ("02-quiz-q1.png", 1.3 + _SLOWER, "Ответь на вопросы"),
+    ("03-quiz-progress.png", 1.1 + _SLOWER, "38 вопросов"),
+    ("04-quiz-results.png", 2.6 + _HOLD + _SLOWER, "Твоё внимание"),
+    ("05-quiz-recs.png", 2.4 + _HOLD + _SLOWER, "Рекомендации"),
+    # home after quiz
+    ("06-home-grid.png", 1.5 + _SLOWER, "Привычки готовы"),
+    ("07-list-view.png", 1.1 + _SLOWER, "Отметь дни"),
+    ("08-day-one.png", 0.85 + _SLOWER, "Отметь дни"),
+    ("09-day-two.png", 0.85 + _SLOWER, "Отметь дни"),
+    ("10-days-filled.png", 1.3 + _SLOWER, "Серия растёт"),
+    ("11-habit-detail.png", 2.2 + _HOLD + _SLOWER, "Детали"),
+    ("12-habit-share.png", 2.6 + _HOLD + _SLOWER, "Поделись привычкой"),
+    ("14-view-grid.png", 1.3 + _SLOWER, "Карточки"),
+    ("14b-stats.png", 2.4 + _HOLD + _SLOWER, "Статистика"),
+    ("14c-stats-habits.png", 2.0 + _HOLD + _SLOWER, "По привычкам"),
+    ("15-pwa-banner.png", 2.2 + _HOLD + _SLOWER, "Установи приложение"),
+    ("16-settings-install.png", 2.0 + _HOLD + _SLOWER, "На домашний экран"),
+    ("17-settings-quiz.png", 1.5 + _SLOWER, "Квиз в настройках"),
+    ("18-outro.png", 2.4 + _SLOWER, "Habiday"),
 ]
 
 
@@ -153,14 +151,15 @@ def compose_frame(
     title_font = load_font(64, bold=True)
     small_font = load_font(28, bold=False)
 
-    if caption == "habit+":
-        brand = "habit"
+    if caption == "Habiday":
+        brand = "Habi"
+        accent = "day"
         tw = draw.textlength(brand, font=title_font)
-        plus_w = draw.textlength("+", font=title_font)
-        cx = (W - tw - plus_w) / 2
+        aw = draw.textlength(accent, font=title_font)
+        cx = (W - tw - aw) / 2
         cy = 56
         draw.text((cx, cy), brand, font=title_font, fill=FG)
-        draw.text((cx + tw, cy), "+", font=title_font, fill=ACCENT)
+        draw.text((cx + tw, cy), accent, font=title_font, fill=ACCENT)
         sub = "привычки без лишнего"
         sw = draw.textlength(sub, font=small_font)
         draw.text(((W - sw) / 2, cy + 72), sub, font=small_font, fill=MUTED)
@@ -522,7 +521,7 @@ def main() -> None:
         for f in range(n_frames):
             out_path = frames_dir / f"frame_{frame_i:05d}.jpg"
             frame.save(out_path, quality=90, optimize=True)
-            if name == "16-view-grid.png" and f == n_frames // 2:
+            if name == "18-outro.png" and f == n_frames // 2:
                 poster_path = out_path
             frame_i += 1
 
@@ -561,10 +560,11 @@ def main() -> None:
         check=True,
     )
 
+    # Share still (outro) — do NOT burn into frame 0 (that caused a home-screen flash).
     if poster_path and poster_path.exists():
         Image.open(poster_path).save(poster, quality=93)
     else:
-        Image.open(frames_dir / f"frame_{frame_i - 1:05d}.jpg").save(poster, quality=93)
+        Image.open(frames_dir / "frame_00000.jpg").save(poster, quality=93)
 
     subprocess.run(
         [
@@ -572,20 +572,9 @@ def main() -> None:
             "-y",
             "-i",
             str(raw_mp4),
-            "-i",
-            str(poster),
-            "-filter_complex",
-            f"[1:v]scale={W}:{H},format=yuv420p[p];"
-            f"[0:v][p]overlay=eof_action=pass:enable='eq(n,0)'[v]",
-            "-map",
-            "[v]",
             "-an",
-            "-c:v",
-            "libx264",
-            "-preset",
-            "medium",
-            "-crf",
-            "18",
+            "-c",
+            "copy",
             "-movflags",
             "+faststart",
             str(final_mp4),
@@ -594,8 +583,8 @@ def main() -> None:
     )
 
     (OUT / "share-copy.txt").write_text(
-        "habit+ — привычки без лишнего.\n"
-        "Создай вручную или из шаблона, отметь дни, переключай виды: карточки, список, колонки.\n",
+        "Habiday — привычки без лишнего.\n"
+        "Квиз → привычки → отметки → шаринг карточки → установка на домашний экран.\n",
         encoding="utf-8",
     )
     print(f"done: {final_mp4}")

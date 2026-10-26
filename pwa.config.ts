@@ -2,8 +2,8 @@ import type { ManifestOptions } from "vite-plugin-pwa";
 
 export const pwaManifest: Partial<ManifestOptions> = {
   id: "/",
-  name: "habit+",
-  short_name: "habit+",
+  name: "Habiday - трекер привычек",
+  short_name: "Habiday",
   description: "Трекер привычек — работает офлайн на телефоне",
   lang: "ru",
   dir: "ltr",
@@ -77,7 +77,7 @@ export const pwaManifest: Partial<ManifestOptions> = {
       sizes: "1280x720",
       type: "image/png",
       form_factor: "wide",
-      label: "habit+ на большом экране",
+      label: "Habiday на большом экране",
     },
     {
       src: "/screenshots/wide-add.png",

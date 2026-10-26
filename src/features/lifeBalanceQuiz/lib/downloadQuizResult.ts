@@ -58,7 +58,7 @@ export async function downloadOrShareQuizResult(
   });
 
   await Share.share({
-    title: "Колесо баланса — habit+",
+    title: "Колесо баланса — Habiday",
     text: "Мой результат квиза баланса сфер",
     url: written.uri,
     dialogTitle: "Сохранить результат",

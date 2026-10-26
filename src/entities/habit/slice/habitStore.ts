@@ -17,8 +17,36 @@ interface HabitState {
   ) => void;
   addHabit: (data: Omit<Habit, "id" | "completions">) => void;
   updateHabit: (id: number, data: Partial<Omit<Habit, "id">>) => void;
+  archiveHabit: (id: number) => void;
+  unarchiveHabit: (id: number) => void;
   deleteHabit: (id: number) => void;
   setViewMode: (mode: ViewMode) => void;
+}
+
+/** Avoid colliding `Date.now()` ids when several habits are added in one tick (e.g. quiz). */
+function nextHabitId(habits: readonly Habit[]): number {
+  const maxId = habits.reduce((max, h) => Math.max(max, h.id), 0);
+  return Math.max(Date.now(), maxId + 1);
+}
+
+/** Repair duplicate ids already written by batch adds that shared one timestamp. */
+export function ensureUniqueHabitIds(habits: readonly Habit[]): Habit[] {
+  const seen = new Set<number>();
+  let nextId = habits.reduce((max, h) => Math.max(max, h.id), Date.now());
+  let changed = false;
+
+  const out = habits.map((h) => {
+    if (!seen.has(h.id)) {
+      seen.add(h.id);
+      return h;
+    }
+    nextId += 1;
+    seen.add(nextId);
+    changed = true;
+    return { ...h, id: nextId };
+  });
+
+  return changed ? out : (habits as Habit[]);
 }
 
 export const useHabitStore = create<HabitState>()(
@@ -75,7 +103,7 @@ export const useHabitStore = create<HabitState>()(
         set((state) => ({
           habits: [
             ...state.habits,
-            { ...data, id: Date.now(), completions: {} },
+            { ...data, id: nextHabitId(state.habits), completions: {} },
           ],
         })),
 
@@ -84,6 +112,24 @@ export const useHabitStore = create<HabitState>()(
           habits: state.habits.map((h) =>
             h.id === id ? { ...h, ...data } : h,
           ),
+        })),
+
+      archiveHabit: (id) =>
+        set((state) => ({
+          habits: state.habits.map((h) =>
+            h.id === id
+              ? { ...h, archivedAt: new Date().toISOString() }
+              : h,
+          ),
+        })),
+
+      unarchiveHabit: (id) =>
+        set((state) => ({
+          habits: state.habits.map((h) => {
+            if (h.id !== id) return h;
+            const { archivedAt: _archivedAt, ...rest } = h;
+            return rest;
+          }),
         })),
 
       deleteHabit: (id) =>
@@ -96,6 +142,14 @@ export const useHabitStore = create<HabitState>()(
     {
       name: "habit-plus-v1",
       storage: createJSONStorage(() => zustandAppStorage),
+      merge: (persisted, current) => {
+        const p = (persisted ?? {}) as Partial<HabitState>;
+        return {
+          ...current,
+          ...p,
+          habits: ensureUniqueHabitIds(p.habits ?? current.habits),
+        };
+      },
     },
   ),
 );

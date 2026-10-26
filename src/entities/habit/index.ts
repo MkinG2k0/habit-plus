@@ -45,5 +45,6 @@ export {
   computeHabitStreak,
   formatLocalDateKey,
 } from "./lib/computeHabitStreak";
+export { isHabitArchived } from "./lib/isHabitArchived";
 export { useHabitStore } from "./slice/habitStore";
 export { useHabitCategoryCatalogStore } from "./slice/habitCategoryCatalogStore";

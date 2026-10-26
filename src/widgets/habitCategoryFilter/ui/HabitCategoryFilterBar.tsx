@@ -6,6 +6,7 @@ import {
   PresetCategoryIcon,
   type HabitCategoryFilter,
 } from "@/features/habitCategories";
+import { useHorizontalWheelScroll } from "@/shared/lib/useHorizontalWheelScroll";
 import { cn } from "@/shared/ui/lib/utils";
 
 interface HabitCategoryFilterBarProps {
@@ -29,13 +30,15 @@ export const HabitCategoryFilterBar = ({
   onChange,
 }: HabitCategoryFilterBarProps) => {
   const chips = buildHomeCategoryFilterChips(habits);
+  const scrollerRef = useHorizontalWheelScroll<HTMLDivElement>();
 
   if (chips.length <= 1) return null;
 
   return (
-    <div className="shrink-0 bg-background/95 px-4 py-2.5 backdrop-blur-sm">
+    <div className="min-w-0 w-full shrink-0 bg-background/95 px-4 py-2 backdrop-blur-sm">
       <div
-        className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-0.5 pt-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        ref={scrollerRef}
+        className="-mx-1 flex min-w-0 gap-2 overflow-x-auto overscroll-x-contain px-1 pb-1.5 pt-0.5 [-webkit-overflow-scrolling:touch]"
         role="tablist"
         aria-label="Фильтр по категориям"
       >

@@ -38,7 +38,12 @@ export const SettingsPage = () => {
           iconClass: ICON_BOX[1],
         },
         { icon: "🎨", label: "Тема", iconClass: ICON_BOX[2] },
-        { icon: "📦", label: "Архив привычек", iconClass: ICON_BOX[3] },
+        {
+          icon: "📦",
+          label: "Архив привычек",
+          iconClass: ICON_BOX[3],
+          to: "/settings/archive",
+        },
         {
           icon: "📤",
           label: "Импорт/Экспорт данных",

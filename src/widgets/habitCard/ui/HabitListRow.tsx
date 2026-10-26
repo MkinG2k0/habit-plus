@@ -39,11 +39,9 @@ export const HabitListRow = ({
       >
         <HabitIcon name={habit.icon} color={habit.color} size={16} />
       </div>
-      <div className="flex min-w-0 flex-1 items-center gap-1.5">
+      <div className="flex min-w-0 flex-1 items-center gap-1.5 text-[15px] font-medium leading-none text-foreground">
         <HabitStreakBadge habit={habit} size="sm" />
-        <div className="min-w-0 truncate text-[15px] font-medium text-foreground">
-          {habit.name}
-        </div>
+        <span className="min-w-0 truncate">{habit.name}</span>
       </div>
       <div
         className="flex gap-1.5"

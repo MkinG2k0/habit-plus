@@ -26,8 +26,8 @@ export const HabitTopBar = () => {
           aria-hidden
         />
         <div className="flex text-center">
-          <span className="text-xl font-bold text-foreground">habit</span>
-          <span className="text-xl font-bold text-chart-1">+</span>
+          <span className="text-xl font-bold text-foreground">Habi</span>
+          <span className="text-xl font-bold text-chart-1">day</span>
         </div>
       </div>
       <div className="flex items-center gap-1">
@@ -36,6 +36,7 @@ export const HabitTopBar = () => {
           variant="ghost"
           size="icon"
           className="text-muted-foreground"
+          onClick={() => navigate("/stats")}
           aria-label="Статистика"
         >
           <ChartIcon />

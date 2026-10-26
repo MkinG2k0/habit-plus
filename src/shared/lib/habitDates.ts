@@ -86,6 +86,15 @@ export function startOfUtcWeekMonday(d: Date): Date {
 
 const YEAR_WINDOW_DAYS = 365;
 
+export type HabitHeatmapWindow =
+  | { mode: "default" }
+  /** Фиксированное окно: последние `days` дней включая сегодня. */
+  | { mode: "days"; days: number }
+  /** Текущая календарная неделя (пн → сегодня) — одна колонка теплокарты. */
+  | { mode: "calendarWeek" }
+  /** От первой отметки до сегодня (или короткое окно, если отметок нет). */
+  | { mode: "all" };
+
 /**
  * Логика теплокарты: по умолчанию окно ~год назад от сегодня;
  * если первая отметка старше этого окна — от первой отметки до сегодня.
@@ -93,6 +102,7 @@ const YEAR_WINDOW_DAYS = 365;
  */
 export function getHabitHeatmapUtcRange(
   completions: Record<string, boolean | number>,
+  window: HabitHeatmapWindow = { mode: "default" },
 ): {
   gridStartMonday: Date;
   rangeStart: Date;
@@ -101,8 +111,6 @@ export function getHabitHeatmapUtcRange(
   const now = new Date();
   const todayKey = getIsoDayKeyUtc(now);
   const endDate = parseIsoDayKeyUtc(todayKey);
-  const oneYearAgo = addUtcDays(endDate, -YEAR_WINDOW_DAYS);
-  const oneYearAgoKey = getIsoDayKeyUtc(oneYearAgo);
 
   const doneKeys = Object.keys(completions).filter((k) =>
     completionDayFilled(completions[k]),
@@ -111,12 +119,25 @@ export function getHabitHeatmapUtcRange(
   const firstKey = doneKeys[0];
 
   let rangeStart: Date;
-  if (!firstKey) {
-    rangeStart = oneYearAgo;
-  } else if (firstKey < oneYearAgoKey) {
-    rangeStart = parseIsoDayKeyUtc(firstKey);
+  if (window.mode === "calendarWeek") {
+    rangeStart = startOfUtcWeekMonday(endDate);
+  } else if (window.mode === "days") {
+    const days = Math.max(1, Math.floor(window.days));
+    rangeStart = addUtcDays(endDate, -(days - 1));
+  } else if (window.mode === "all") {
+    rangeStart = firstKey
+      ? parseIsoDayKeyUtc(firstKey)
+      : addUtcDays(endDate, -(30 - 1));
   } else {
-    rangeStart = oneYearAgo;
+    const oneYearAgo = addUtcDays(endDate, -YEAR_WINDOW_DAYS);
+    const oneYearAgoKey = getIsoDayKeyUtc(oneYearAgo);
+    if (!firstKey) {
+      rangeStart = oneYearAgo;
+    } else if (firstKey < oneYearAgoKey) {
+      rangeStart = parseIsoDayKeyUtc(firstKey);
+    } else {
+      rangeStart = oneYearAgo;
+    }
   }
 
   const gridStartMonday = startOfUtcWeekMonday(rangeStart);

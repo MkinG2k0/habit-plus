@@ -1,4 +1,4 @@
-import type { Habit } from "@/entities/habit";
+import { isHabitArchived, type Habit } from "@/entities/habit";
 import { listReminderFiresInHorizon } from "./listReminderFires";
 import {
   habitReminderNotificationId,
@@ -26,6 +26,7 @@ export function collectReminderJobs(
   const jobs: ReminderJob[] = [];
 
   for (const habit of habits) {
+    if (isHabitArchived(habit)) continue;
     for (const reminder of habit.reminders ?? []) {
       for (const at of listReminderFiresInHorizon(reminder, from, horizonDays)) {
         const atMs = at.getTime();

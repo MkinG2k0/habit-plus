@@ -42,11 +42,9 @@ export const HabitCard = ({
             <HabitIcon name={habit.icon} color={habit.color} size={18} />
           </div>
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
+            <div className="flex min-w-0 items-center gap-1.5 text-base font-semibold leading-none text-foreground">
               <HabitStreakBadge habit={habit} />
-              <div className="min-w-0 truncate text-base font-semibold text-foreground">
-                {habit.name}
-              </div>
+              <span className="min-w-0 truncate">{habit.name}</span>
             </div>
             {habit.desc ? (
               <div className="mt-0.5 truncate text-xs text-muted-foreground">

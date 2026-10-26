@@ -34,7 +34,7 @@ export const downloadOrShareBackup = async (
   });
 
   await Share.share({
-    title: "Бэкап habit+",
+    title: "Бэкап Habiday",
     text: "Сохраните файл в Drive или Files — на случай сброса телефона.",
     url: written.uri,
     dialogTitle: "Сохранить бэкап",

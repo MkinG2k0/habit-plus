@@ -78,7 +78,7 @@ const PwaInstallPromptInner = () => {
                 id="pwa-install-title"
                 className="text-sm font-medium text-foreground"
               >
-                Установить habit+
+                Установить Habiday
               </p>
               <p
                 id="pwa-install-desc"

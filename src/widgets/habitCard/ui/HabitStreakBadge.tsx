@@ -19,23 +19,24 @@ export const HabitStreakBadge = ({
   if (interval === "none") return null;
 
   const count = computeHabitStreak(habit);
-  const iconSize = size === "sm" ? 12 : 14;
 
   return (
     <span
       className={cn(
-        "inline-flex shrink-0 items-center gap-0.5 tabular-nums text-muted-foreground",
-        size === "sm" ? "text-[11px]" : "text-xs",
+        "inline-flex shrink-0 items-center gap-0.5 font-semibold leading-none text-foreground",
+        size === "sm" ? "text-[11px]" : "text-inherit",
         className,
       )}
       aria-label={`Текущая серия: ${count}`}
     >
+      <span className="inline-block min-w-[2ch] text-right tabular-nums">
+        {count}
+      </span>
       <Flame
-        size={iconSize}
-        className="shrink-0 text-orange-500"
+        className="size-[1em] shrink-0 text-orange-500"
+        strokeWidth={2.25}
         aria-hidden
       />
-      <span className="font-medium text-foreground">{count}</span>
     </span>
   );
 };

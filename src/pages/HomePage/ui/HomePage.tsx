@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   completionDayFilled,
+  isHabitArchived,
   useHabitStore,
   type Habit,
 } from "@/entities/habit";
@@ -16,6 +17,8 @@ import { HabitCustomValueDrawer } from "@/features/habitCustomValue";
 import { HabitDetailDrawer } from "@/features/habitDetail";
 import { useQuizOnboardingStore } from "@/features/lifeBalanceQuiz";
 import { useLastNDays, useTodayKey } from "@/shared/lib/habitDates";
+import { useHorizontalWheelScroll } from "@/shared/lib/useHorizontalWheelScroll";
+import { ConfirmDialog } from "@/shared/ui/confirmDialog/ConfirmDialog";
 import { Badge } from "@/shared/ui/shadCNComponents/ui/badge";
 import { Button } from "@/shared/ui/shadCNComponents/ui/button";
 import { cn } from "@/shared/ui/lib/utils";
@@ -30,8 +33,14 @@ import {
 
 export const HomePage = () => {
   const navigate = useNavigate();
-  const { habits, viewMode, setViewMode, toggleToday, toggleDateCompletion } =
-    useHabitStore();
+  const {
+    habits,
+    viewMode,
+    setViewMode,
+    toggleToday,
+    toggleDateCompletion,
+    archiveHabit,
+  } = useHabitStore();
   const quizDone = useQuizOnboardingStore((s) => s.hasCompletedOrSkippedQuiz);
   const today = useTodayKey();
   const last5 = useLastNDays(5);
@@ -42,12 +51,17 @@ export const HomePage = () => {
     habitId: number;
     dateKey: string;
   } | null>(null);
+  const [archiveTarget, setArchiveTarget] = useState<Habit | null>(null);
   const detailCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
-  const filterChips = useMemo(
-    () => buildHomeCategoryFilterChips(habits),
+  const activeHabits = useMemo(
+    () => habits.filter((h) => !isHabitArchived(h)),
     [habits],
+  );
+  const filterChips = useMemo(
+    () => buildHomeCategoryFilterChips(activeHabits),
+    [activeHabits],
   );
 
   useEffect(() => {
@@ -59,16 +73,18 @@ export const HomePage = () => {
   }, [categoryFilter, filterChips]);
 
   const filteredHabits = useMemo(
-    () => habits.filter((h) => habitMatchesCategoryFilter(h, categoryFilter)),
-    [habits, categoryFilter],
+    () =>
+      activeHabits.filter((h) => habitMatchesCategoryFilter(h, categoryFilter)),
+    [activeHabits, categoryFilter],
   );
 
-  const detailHabit = habits.find((h) => h.id === detailId) ?? null;
+  const detailHabit =
+    activeHabits.find((h) => h.id === detailId) ?? null;
 
   const customValueHabit = useMemo(() => {
     if (!customValueTarget) return null;
-    return habits.find((h) => h.id === customValueTarget.habitId) ?? null;
-  }, [habits, customValueTarget]);
+    return activeHabits.find((h) => h.id === customValueTarget.habitId) ?? null;
+  }, [activeHabits, customValueTarget]);
 
   useEffect(() => {
     if (customValueTarget && !customValueHabit) {
@@ -108,14 +124,15 @@ export const HomePage = () => {
   }, []);
 
   const drawerOpen = isDetailDrawerOpen && detailHabit !== null;
+  const colsScrollRef = useHorizontalWheelScroll<HTMLDivElement>();
 
   return (
     <>
-      <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-background">
+      <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background">
         <HabitTopBar />
 
         <HabitCategoryFilterBar
-          habits={habits}
+          habits={activeHabits}
           value={categoryFilter}
           onChange={setCategoryFilter}
         />
@@ -151,14 +168,15 @@ export const HomePage = () => {
         ) : null}
 
         <div
+          ref={colsScrollRef}
           className={cn(
-            "min-h-0 flex-1 px-4",
+            "min-h-0 min-w-0 flex-1 px-4",
             viewMode === "cols"
-              ? "overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              ? "overflow-x-auto overflow-y-hidden overscroll-x-contain pb-1 [-webkit-overflow-scrolling:touch]"
               : "overflow-y-auto",
           )}
         >
-          {habits.length === 0 ? (
+          {activeHabits.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-4 px-2 py-16 text-center">
               <p className="text-muted-foreground">
                 {quizDone
@@ -228,7 +246,7 @@ export const HomePage = () => {
               ))}
             </div>
           ) : (
-            <div className="flex h-full min-h-0 items-stretch gap-2.5 pb-28">
+            <div className="flex h-full min-h-0 w-max min-w-full items-stretch gap-2.5 pb-28">
               {filteredHabits.map((h) => (
                 <HabitMiniCard
                   key={h.id}
@@ -287,6 +305,28 @@ export const HomePage = () => {
             detailCloseTimerRef.current = null;
             navigate(`/edit/${h.id}/reminders`);
           }, 280);
+        }}
+        onArchive={(h) => setArchiveTarget(h)}
+      />
+
+      <ConfirmDialog
+        open={archiveTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setArchiveTarget(null);
+        }}
+        title="В архив?"
+        description={
+          archiveTarget
+            ? `«${archiveTarget.name}» исчезнет с главного экрана. Статистика сохранится — вернуть можно в Настройки → Архив привычек.`
+            : ""
+        }
+        confirmLabel="В архив"
+        cancelLabel="Отмена"
+        onConfirm={() => {
+          if (!archiveTarget) return;
+          archiveHabit(archiveTarget.id);
+          setArchiveTarget(null);
+          closeDetail();
         }}
       />
 

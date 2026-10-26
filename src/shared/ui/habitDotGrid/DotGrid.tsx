@@ -4,6 +4,7 @@ import {
   buildUtcWeekColumns,
   getHabitHeatmapUtcRange,
   getIsoDayKeyUtc,
+  type HabitHeatmapWindow,
 } from "@/shared/lib/habitDates";
 import { cn } from "@/shared/ui/lib/utils";
 
@@ -15,9 +16,20 @@ interface DotGridProps {
   className?: string;
   /** Подогнать сетку под ширину и высоту контейнера (без пустоты). */
   adaptive?: boolean;
+  /** Окно дат теплокарты (по умолчанию — годовое / от первой отметки). */
+  heatmapWindow?: HabitHeatmapWindow;
+  /** Прозрачность пустой ячейки в диапазоне (по умолчанию 0.1). */
+  emptyOpacity?: number;
+  /** Прозрачность ячейки вне диапазона (по умолчанию 0.06). */
+  outOfRangeOpacity?: number;
 }
 
 type DotCell = { key: string; inRange: boolean; done: boolean };
+
+type FitState = {
+  size: number;
+  weekCount: number;
+};
 
 export const DotGrid = ({
   completions,
@@ -26,13 +38,21 @@ export const DotGrid = ({
   gap = 3,
   className,
   adaptive = false,
+  heatmapWindow = { mode: "default" },
+  emptyOpacity = 0.1,
+  outOfRangeOpacity = 0.06,
 }: DotGridProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [fit, setFit] = useState({ size: dotSize, weekCount: 0 });
+  const [fit, setFit] = useState<FitState>({
+    size: dotSize,
+    weekCount: 0,
+  });
 
   const weekColumns = useMemo(() => {
-    const { gridStartMonday, rangeStart, endDate } =
-      getHabitHeatmapUtcRange(completions);
+    const { gridStartMonday, rangeStart, endDate } = getHabitHeatmapUtcRange(
+      completions,
+      heatmapWindow,
+    );
     const weeks = buildUtcWeekColumns(gridStartMonday, endDate);
     const rsTime = rangeStart.getTime();
     const edTime = endDate.getTime();
@@ -45,7 +65,7 @@ export const DotGrid = ({
         return { key, inRange, done };
       }),
     );
-  }, [completions]);
+  }, [completions, heatmapWindow]);
 
   const visibleWeeks = useMemo(() => {
     if (!adaptive || fit.weekCount <= 0) return weekColumns;
@@ -68,15 +88,21 @@ export const DotGrid = ({
       const w = el.clientWidth;
       if (h <= 0 || w <= 0) return;
 
-      // Квадратные ячейки: 7 рядов на всю высоту → число недель ≈ 7·w/h
-      const sizeFromH = Math.max(6, (h - gap * 6) / 7);
-      const weeksForSquare = Math.max(1, Math.round(w / sizeFromH));
-      const weekCount = Math.max(4, weeksForSquare);
-      const nextSize = Math.round(sizeFromH);
+      // Квадратные ячейки от высоты — никогда не растягиваем в полоски.
+      const sizeFromH = Math.max(4, Math.floor((h - gap * 6) / 7));
+      const maxWeeksByWidth = Math.max(
+        1,
+        Math.floor((w + gap) / (sizeFromH + gap)),
+      );
+      const available = Math.max(1, weekColumns.length);
+      const next: FitState = {
+        size: sizeFromH,
+        weekCount: Math.min(available, maxWeeksByWidth),
+      };
       setFit((prev) =>
-        prev.size === nextSize && prev.weekCount === weekCount
+        prev.size === next.size && prev.weekCount === next.weekCount
           ? prev
-          : { size: nextSize, weekCount },
+          : next,
       );
     };
 
@@ -84,7 +110,7 @@ export const DotGrid = ({
     const ro = new ResizeObserver(update);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [adaptive, gap, dotSize]);
+  }, [adaptive, gap, dotSize, weekColumns.length]);
 
   useLayoutEffect(() => {
     if (adaptive) return;
@@ -99,20 +125,21 @@ export const DotGrid = ({
       className={cn(
         "h-full w-full min-h-0 min-w-0",
         adaptive
-          ? "overflow-hidden"
-          : "overflow-x-auto [scrollbar-width:thin]",
+          ? "flex items-center justify-end overflow-hidden"
+          : "overflow-x-auto pb-1.5 [scrollbar-width:thin]",
         className,
       )}
     >
       <div
-        className={cn("grid", adaptive ? "h-full w-full" : "w-max")}
+        className={cn("grid shrink-0", !adaptive && "w-max")}
         style={
           adaptive
             ? {
-                gridTemplateRows: "repeat(7, 1fr)",
-                gridTemplateColumns: `repeat(${Math.max(1, visibleWeeks.length)}, 1fr)`,
                 gridAutoFlow: "column",
-                gap,
+                gridTemplateRows: `repeat(7, ${size}px)`,
+                gridTemplateColumns: `repeat(${Math.max(1, visibleWeeks.length)}, ${size}px)`,
+                columnGap: gap,
+                rowGap: gap,
               }
             : {
                 gridAutoFlow: "column",
@@ -125,16 +152,16 @@ export const DotGrid = ({
         {cells.map((dot) => (
           <div
             key={dot.key}
-            className={cn(
-              "min-h-0 min-w-0 rounded-[2px] transition-colors",
-              !adaptive && "shrink-0",
-            )}
+            className="shrink-0 rounded-[2px] transition-colors"
             style={{
-              ...(adaptive
-                ? { width: "100%", height: "100%" }
-                : { width: size, height: size }),
+              width: size,
+              height: size,
               backgroundColor: color,
-              opacity: dot.inRange ? (dot.done ? 1 : 0.1) : 0.06,
+              opacity: dot.inRange
+                ? dot.done
+                  ? 1
+                  : emptyOpacity
+                : outOfRangeOpacity,
             }}
           />
         ))}

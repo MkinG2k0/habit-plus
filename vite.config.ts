@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import path from "path";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
@@ -68,6 +69,18 @@ export default defineConfig({
             { name: "widgets", test: /src\/shared\/ui\/widgets\// },
           ],
         },
+      },
+    },
+  },
+  test: {
+    globals: false,
+    environment: "jsdom",
+    setupFiles: ["./src/test/setup.ts"],
+    include: ["src/**/*.{test,spec}.{ts,tsx}"],
+    css: false,
+    server: {
+      deps: {
+        inline: ["virtual:pwa-register"],
       },
     },
   },

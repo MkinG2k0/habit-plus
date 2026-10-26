@@ -18,10 +18,18 @@ const SettingsPage = lazy(() =>
 const DataBackupPage = lazy(() =>
   import("@/pages/DataBackupPage").then((m) => ({ default: m.DataBackupPage })),
 );
+const HabitArchivePage = lazy(() =>
+  import("@/pages/HabitArchivePage").then((m) => ({
+    default: m.HabitArchivePage,
+  })),
+);
 const LifeBalanceQuizPage = lazy(() =>
   import("@/pages/LifeBalanceQuizPage").then((m) => ({
     default: m.LifeBalanceQuizPage,
   })),
+);
+const StatsPage = lazy(() =>
+  import("@/pages/StatsPage").then((m) => ({ default: m.StatsPage })),
 );
 
 export const AppRoutes = () => {
@@ -40,6 +48,14 @@ export const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <LifeBalanceQuizPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/stats"
+        element={
+          <ProtectedRoute>
+            <StatsPage />
           </ProtectedRoute>
         }
       />
@@ -80,6 +96,14 @@ export const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <DataBackupPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settings/archive"
+        element={
+          <ProtectedRoute>
+            <HabitArchivePage />
           </ProtectedRoute>
         }
       />

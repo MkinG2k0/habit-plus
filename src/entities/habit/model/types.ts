@@ -52,6 +52,11 @@ export interface Habit {
   categoryTags?: HabitCategoryTag[];
   trackingMode?: "step" | "custom";
   dailyGoal?: number;
+  /**
+   * ISO-дата архивации. Пока задана — привычка скрыта с главного экрана,
+   * статистика (`completions`) сохраняется; вернуть можно из настроек.
+   */
+  archivedAt?: string;
 }
 
 export type ViewMode = "grid" | "list" | "cols";

@@ -8,6 +8,7 @@ interface HabitDetailDrawerProps {
   onOpenChange: (open: boolean) => void;
   onEdit: (habit: Habit) => void;
   onOpenReminders?: (habit: Habit) => void;
+  onArchive?: (habit: Habit) => void;
   onToggleHabitDay: (habit: Habit, dateKey: string) => void;
 }
 
@@ -17,6 +18,7 @@ export const HabitDetailDrawer = ({
   onOpenChange,
   onEdit,
   onOpenReminders,
+  onArchive,
   onToggleHabitDay,
 }: HabitDetailDrawerProps) => {
   return (
@@ -30,6 +32,7 @@ export const HabitDetailDrawer = ({
             onOpenReminders={
               onOpenReminders ? () => onOpenReminders(habit) : undefined
             }
+            onArchive={onArchive ? () => onArchive(habit) : undefined}
             onToggleDay={(dateKey) => onToggleHabitDay(habit, dateKey)}
           />
         ) : null}

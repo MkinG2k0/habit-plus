@@ -13,6 +13,7 @@ import {
   getCompletionNumericValue,
   type Habit,
 } from "@/entities/habit";
+import { HabitShareDialog } from "@/features/habitShare";
 import { formatStreakGoalSummary } from "@/features/habitStreakGoal";
 import { DotGrid } from "@/shared/ui/habitDotGrid/DotGrid";
 import { HabitIcon } from "@/shared/ui/habitIcon/HabitIcon";
@@ -22,7 +23,7 @@ import type { Swiper as SwiperClass } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import { Separator } from "@radix-ui/react-separator";
-import { Flame } from "lucide-react";
+import { Flame, Share } from "lucide-react";
 
 const MONTH_NAMES_RU = [
   "Янв",
@@ -45,6 +46,7 @@ interface HabitDetailContentProps {
   onClose: () => void;
   onEdit: () => void;
   onOpenReminders?: () => void;
+  onArchive?: () => void;
   onToggleDay: (dateKey: string) => void;
 }
 
@@ -92,11 +94,13 @@ export const HabitDetailContent = ({
   onClose,
   onEdit,
   onOpenReminders,
+  onArchive,
   onToggleDay,
 }: HabitDetailContentProps) => {
   const [centerMonth, setCenterMonth] = useState(() =>
     startOfMonth(new Date()),
   );
+  const [shareOpen, setShareOpen] = useState(false);
   const swiperRef = useRef<SwiperClass | null>(null);
   const shouldRecenterSwiperRef = useRef(false);
   const jumpToTodayRef = useRef<{
@@ -199,23 +203,21 @@ export const HabitDetailContent = ({
           <HabitIcon name={habit.icon} color={habit.color} size={20} />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="flex min-w-0 items-center gap-2">
+          <div className="flex min-w-0 items-center gap-1.5 text-lg font-bold leading-none text-foreground">
             <span
-              className="inline-flex shrink-0 items-center gap-0.5 tabular-nums text-muted-foreground"
+              className="inline-flex shrink-0 items-center gap-0.5"
               aria-label={`Текущая серия: ${streakCount}`}
             >
-              <Flame
-                size={14}
-                className="shrink-0 text-orange-500"
-                aria-hidden
-              />
-              <span className="text-sm font-medium text-foreground">
+              <span className="inline-block min-w-[2ch] text-right tabular-nums">
                 {streakCount}
               </span>
+              <Flame
+                className="size-[1em] shrink-0 text-orange-500"
+                strokeWidth={2.25}
+                aria-hidden
+              />
             </span>
-            <div className="min-w-0 truncate text-lg font-bold text-foreground">
-              {habit.name}
-            </div>
+            <span className="min-w-0 truncate">{habit.name}</span>
           </div>
           <div className="text-sm text-muted-foreground">
             {habit.desc || "Нет описания"}
@@ -248,6 +250,16 @@ export const HabitDetailContent = ({
           variant="secondary"
           size="icon"
           className="size-9 rounded-lg border border-border"
+          onClick={() => setShareOpen(true)}
+          aria-label="Поделиться привычкой"
+        >
+          <Share className="size-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          size="icon"
+          className="size-9 rounded-lg border border-border"
           onClick={onEdit}
           aria-label="Редактировать"
         >
@@ -264,7 +276,25 @@ export const HabitDetailContent = ({
         >
           <SettingsSmIcon />
         </Button>
+        {onArchive ? (
+          <Button
+            type="button"
+            variant="secondary"
+            size="icon"
+            className="size-9 rounded-lg border border-border"
+            onClick={onArchive}
+            aria-label="Отправить в архив"
+          >
+            <ArchiveIcon />
+          </Button>
+        ) : null}
       </div>
+
+      <HabitShareDialog
+        habit={habit}
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+      />
 
       <Separator />
 
@@ -513,6 +543,27 @@ function SettingsSmIcon() {
     >
       <circle cx="12" cy="12" r="3" />
       <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+    </svg>
+  );
+}
+
+function ArchiveIcon() {
+  return (
+    <svg
+      width={16}
+      height={16}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="text-muted-foreground"
+      aria-hidden
+    >
+      <rect x="2" y="4" width="20" height="5" rx="1" />
+      <path d="M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9" />
+      <path d="M10 13h4" />
     </svg>
   );
 }
